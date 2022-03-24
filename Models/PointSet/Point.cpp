@@ -1,6 +1,7 @@
 #include "Point.h"
 
 #include <cstring>
+#include <stdexcept>
 
 Point::Point(int dimension, float* features, bool value)
 {
@@ -13,4 +14,27 @@ Point::Point(int dimension, float* features, bool value)
 Point::~Point()
 {
 	delete this->features;
+}
+
+int Point::get_dimension()
+{
+	return this->dimension;
+}
+
+bool Point::get_value()
+{
+	return this-> value;
+}
+
+float Point::get_feature(std::size_t position)
+{
+	if(position < dimension)
+		return this->features[position];
+	else
+		throw std::out_of_range("position should be less than dimension");
+}
+
+float Point::operator[](std::size_t position)
+{
+	return this->get_feature(position);
 }
