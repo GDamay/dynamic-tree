@@ -3,7 +3,24 @@
 #include <cstring>
 #include <stdexcept>
 
-Point::Point(int dimension, float* features, bool value)
+Point::Point(const int dimension, const float* features, const bool value)
+{
+	this->dimension = dimension;
+	this-> value = value;
+	this->features = new float[dimension];
+	memcpy(this->features, features, dimension*sizeof(float));
+}
+
+Point& Point::operator=(const Point& source)
+{
+	this->dimension = dimension;
+	this-> value = value;
+	this->features = new float[dimension];
+	memcpy(this->features, features, dimension*sizeof(float));
+	return *this;
+}
+
+Point::Point(const Point& source)
 {
 	this->dimension = dimension;
 	this-> value = value;

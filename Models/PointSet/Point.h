@@ -11,7 +11,9 @@ class Point {
 		bool value;
 	
 	public:
-		Point(int dimension, float* features, bool value);
+		Point(const int dimension, const float* features, const bool value);
+		Point& operator=(const Point& source);
+		Point(const Point& source);
 		~Point();
 		
 		int get_dimension();
