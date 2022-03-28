@@ -7,8 +7,8 @@ run: all
 
 all: $(EXEC_FILE)
 
-$(EXEC_FILE): main.o Point.o PointSet.o
-	$(GXX) -o $(EXEC_FILE) main.o Point.o PointSet.o
+$(EXEC_FILE): main.o Point.o PointSet.o Vertex.o
+	$(GXX) -o $(EXEC_FILE) main.o Point.o PointSet.o Vertex.o
 
 main.o: main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h
 	$(GXX) -c main.cpp
@@ -18,6 +18,9 @@ Point.o: Models/PointSet/Point.h Models/PointSet/Point.cpp
 
 PointSet.o: Models/PointSet/Point.h Models/PointSet/PointSet.h Models/PointSet/PointSet.cpp
 	$(GXX) -c Models/PointSet/PointSet.cpp
-	
+
+Vertex.o: Models/Tree/Vertex.cpp Models/Tree/Vertex.h Models/PointSet/Point.h Models/PointSet/PointSet.h
+	$(GXX) -c Models/Tree/Vertex.cpp
+
 clean:
 	$(RM) *.o *.exe

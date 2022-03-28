@@ -137,6 +137,7 @@ float* PointSet::get_gini_gain()
 					this->best_gain = i_dimension;
 			}
 		}
+		this->is_gain_calculated = true;
 	}
 	return this->gini_gain;
 }
