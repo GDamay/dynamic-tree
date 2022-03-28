@@ -13,19 +13,19 @@ Point::Point(const int dimension, const float* features, const bool value)
 
 Point& Point::operator=(const Point& source)
 {
-	this->dimension = dimension;
-	this-> value = value;
-	this->features = new float[dimension];
-	memcpy(this->features, features, dimension*sizeof(float));
+	this->dimension = source.dimension;
+	this-> value = source.value;
+	this->features = new float[source.dimension];
+	memcpy(this->features, source.features, source.dimension*sizeof(float));
 	return *this;
 }
 
 Point::Point(const Point& source)
 {
-	this->dimension = dimension;
-	this-> value = value;
-	this->features = new float[dimension];
-	memcpy(this->features, features, dimension*sizeof(float));
+	this->dimension = source.dimension;
+	this-> value = source.value;
+	this->features = new float[source.dimension];
+	memcpy(this->features, source.features, source.dimension*sizeof(float));
 }
 
 Point::~Point()
