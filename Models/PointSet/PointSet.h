@@ -42,6 +42,8 @@ class PointSet {
 		//Does provide true best gain
 		float get_best_gain();
 		size_t get_best_index();
+
+		void add_point(Point* new_point);
 		
 		//Gives ownership
 		std::array<PointSet*, 2> split_at_best();

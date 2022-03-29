@@ -35,6 +35,11 @@ int main(int argc, char *argv[])
 
 	Tree test_tree(list_of_points, DIMENSION, 5);
 	std::cout << test_tree.decision(value) << std::endl;
+
+	Point test_fourth(DIMENSION, value, true);
+	test_pointset->add_point(&test_fourth);
+    std::cout << test_pointset->get_gini() << std::endl;
+    std::cout << test_pointset->get_best_gain() << std::endl;
     delete test_splited[0];
     delete test_splited[1];
     return 0;
