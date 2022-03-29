@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     value[1] = 0.0; value[2] = 0.0;
     Point challenge_point(DIMENSION, value, false);
-    std::cout << root.decision(challenge_point) << std::endl;
+    std::cout << root.decision(value) << std::endl;
 
     delete test_splited[0];
     delete test_splited[1];

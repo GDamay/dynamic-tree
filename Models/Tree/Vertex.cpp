@@ -36,11 +36,11 @@ void Vertex::build()
 	}
 }
 
-bool Vertex::decision(Point& to_decide)
+bool Vertex::decision(const float* features)
 {
 	this->build();
 	if(this->is_leaf)
 		return this->pointset->get_positive_proportion() >= 0.5;
 	else
-		return to_decide[this->split_parameter] == 0 ? this->under_child->decision(to_decide) : this->over_child->decision(to_decide);
+		return features[this->split_parameter] == 0 ? this->under_child->decision(features) : this->over_child->decision(features);
 }

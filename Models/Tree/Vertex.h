@@ -26,6 +26,8 @@ class Vertex {
 		Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, bool is_root = false);
 		~Vertex();
 		void build();
-		bool decision(Point& to_decide);
+		
+		//Does not take ownership
+		bool decision(const float* features);
 };
 #endif // VERTEX_H_INCLUDED
