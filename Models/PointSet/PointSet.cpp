@@ -2,7 +2,7 @@
 #include <math.h>
 #include <cstring>
 
-PointSet::PointSet(std::list<Point*> points, size_t dimension) : points(points)
+PointSet::PointSet(std::vector<Point*> points, size_t dimension) : points(points)
 {
 		this->is_gini_calculated = false;
 		this->is_gain_calculated = false;
@@ -157,8 +157,8 @@ float PointSet::get_best_gain()
 std::array<PointSet*, 2> PointSet::split_at_best()
 {
 	this->get_gini_gain();
-	std::list<Point*> points_under; 
-	std::list<Point*> points_over;
+	std::vector<Point*> points_under;
+	std::vector<Point*> points_over;
 	for(auto it = this->points.begin(); it != this->points.end(); it++)
 		if((*it)->get_feature(this->best_gain) == 0)
 			points_under.push_back(*it);

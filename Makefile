@@ -11,8 +11,8 @@ run: all
 
 all: $(EXEC_FILE)
 
-$(EXEC_FILE): main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT)
-	$(LINKER) $(LINK_OUT)$(EXEC_FILE) main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT)
+$(EXEC_FILE): main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
+	$(LINKER) $(LINK_OUT)$(EXEC_FILE) main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
 
 main$(OBJ_EXT): main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h
 	$(GXX) -c main.cpp
@@ -25,6 +25,9 @@ PointSet$(OBJ_EXT): Models/PointSet/Point.h Models/PointSet/PointSet.h Models/Po
 
 Vertex$(OBJ_EXT): Models/Tree/Vertex.cpp Models/Tree/Vertex.h Models/PointSet/Point.h Models/PointSet/PointSet.h
 	$(GXX) -c Models/Tree/Vertex.cpp
+
+Tree$(OBJ_EXT): Models/Tree/Tree.cpp Models/Tree/Tree.h Models/Tree/Vertex.h Models/PointSet/PointSet.h Models/PointSet/Point.h
+	$(GXX) -c Models/Tree/Tree.cpp
 
 clean:
 	$(RM) *$(OBJ_EXT) *.exe

@@ -2,13 +2,13 @@
 #ifndef POINTSET_H_INCLUDED
 #define POINTSET_H_INCLUDED
 
-#include <list>
+#include <vector>
 #include <array>
 #include "Point.h"
 
 class PointSet {
 	private:
-		std::list<Point*> points;
+		std::vector<Point*> points;
 		size_t dimension;
 		float positive_proportion;
 		bool is_positive_proportion_calculated;
@@ -27,7 +27,7 @@ class PointSet {
 		bool is_gain_calculated;
 	
 	public:
-		PointSet(std::list<Point*> points, size_t dimension);
+		PointSet(std::vector<Point*> points, size_t dimension);
 		PointSet(const PointSet& source);
 		PointSet& operator=(const PointSet& source);
 		~PointSet();
