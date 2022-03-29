@@ -70,10 +70,10 @@ float PointSet::get_positive_proportion()
 {
 	if(!this->is_positive_proportion_calculated)
 	{
-		unsigned int counter  = 0;
+		this->positive_counter  = 0;
 		for(auto it = this->points.begin(); it != this->points.end(); it++)
-			counter += (*it)->get_value();
-		this->positive_proportion = (float)counter / (float)this->points.size();
+			this->positive_counter += (*it)->get_value();
+		this->positive_proportion = (float)this->positive_counter / (float)this->points.size();
 		this-> is_positive_proportion_calculated = true;
 	}
 	return this->positive_proportion;

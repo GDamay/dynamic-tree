@@ -10,6 +10,7 @@ class PointSet {
 	private:
 		std::vector<Point*> points;
 		size_t dimension;
+		unsigned int positive_counter;
 		float positive_proportion;
 		bool is_positive_proportion_calculated;
 		float gini;
