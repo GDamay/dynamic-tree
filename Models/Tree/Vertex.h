@@ -9,7 +9,11 @@ class Vertex {
 	private:
 		bool is_leaf;
 		bool is_root;
-		bool is_built;
+		bool is_to_build;
+
+		// If has already been built
+		bool is_to_clean;
+
 		size_t split_parameter;
 		unsigned int remaining_high;
 		unsigned int updates_since_last_build;
