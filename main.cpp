@@ -1,5 +1,5 @@
 #include <iostream>
-#include <vector>
+#include <set>
 #include "Models/PointSet/Point.h"
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
     value[0] = 0.0;
     Point* test_third = new Point(DIMENSION, value, false);
 
-    std::vector<Point*> list_of_points;
-    list_of_points.push_back(test_point);
-    list_of_points.push_back(test_second);
-    list_of_points.push_back(test_third);
+    std::multiset<Point*> list_of_points;
+    list_of_points.insert(test_point);
+    list_of_points.insert(test_second);
+    list_of_points.insert(test_third);
     PointSet* test_pointset = new PointSet(list_of_points, DIMENSION);
     std::cout << test_pointset->get_gini() << std::endl;
     std::cout << test_pointset->get_best_gain() << std::endl;

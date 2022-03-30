@@ -20,7 +20,7 @@ Point& Point::operator=(const Point& source)
 	return *this;
 }
 
-bool Point::operator<(const Point& other)
+bool Point::operator<(const Point& other) const
 {
 	for(size_t i = 0; i < dimension; i++)
 		if(this->features[i] < other.features[i])
@@ -30,7 +30,7 @@ bool Point::operator<(const Point& other)
 	return this->value < other.value;
 }
 
-bool Point::operator==(const Point& other)
+bool Point::operator==(const Point& other) const
 {
 	for(size_t i = 0; i < dimension; i++)
 		if(this->features[i] != other.features[i])

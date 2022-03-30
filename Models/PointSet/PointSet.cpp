@@ -2,7 +2,7 @@
 #include <math.h>
 #include <cstring>
 
-PointSet::PointSet(std::vector<Point*> points, size_t dimension) : points(points)
+PointSet::PointSet(std::multiset<Point*> points, size_t dimension) : points(points)
 {
 		this->is_gini_calculated = false;
 		this->is_gain_calculated = false;
@@ -146,7 +146,7 @@ float* PointSet::get_gini_gain()
 
 void PointSet::add_point(Point* new_point)
 {
-	this->points.push_back(new_point);
+	this->points.insert(new_point);
 	if(this->is_positive_proportion_calculated)
 	{
 		this->positive_counter += new_point->get_value();
@@ -172,13 +172,15 @@ float PointSet::get_best_gain()
 std::array<PointSet*, 2> PointSet::split_at_best()
 {
 	this->get_gini_gain();
-	std::vector<Point*> points_under;
-	std::vector<Point*> points_over;
+	std::multiset<Point*> points_under;
+	std::multiset<Point*> points_over;
+	auto it_under = points_under.begin();
+	auto it_over = points_over.begin();
 	for(auto it = this->points.begin(); it != this->points.end(); it++)
 		if((*it)->get_feature(this->best_gain) == 0)
-			points_under.push_back(*it);
+			it_under = points_under.insert(it_under, *it);
 		else
-			points_over.push_back(*it);
+			it_over = points_over.insert(it_over, *it);
 	std::array<PointSet*, 2> to_return = {new PointSet(points_under, this->dimension), new PointSet(points_over, this->dimension)};
 	to_return[0]->positive_proportion = this->under_counter[this->best_gain] == 0 ? 0 :
 		(float)this->under_positive_counter[this->best_gain]/(float)this->under_counter[this->best_gain];

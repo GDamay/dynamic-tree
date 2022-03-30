@@ -17,8 +17,8 @@ class Point {
 		// For  multiset.
 		// This is smaller if the first non-equal feature is smaller
 		// Or all features are equals and value is smaller 
-		bool operator<(const Point& other);
-		bool operator==(const Point& other);
+		bool operator<(const Point& other) const;
+		bool operator==(const Point& other) const;
 		Point(const Point& source);
 		~Point();
 		
