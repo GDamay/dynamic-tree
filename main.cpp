@@ -36,9 +36,8 @@ int main(int argc, char *argv[])
 	Tree test_tree(list_of_points, DIMENSION, 5);
 	std::cout << test_tree.decision(value) << std::endl;
 
-	Point test_fourth(DIMENSION, value, true);
-	root.add_point(&test_fourth);
-    std::cout << root.decision(value) << std::endl;
+	test_tree.add_point(value, true);
+    std::cout << test_tree.decision(value) << std::endl;
     delete test_splited[0];
     delete test_splited[1];
     return 0;

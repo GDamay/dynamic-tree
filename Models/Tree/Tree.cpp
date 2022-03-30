@@ -15,6 +15,13 @@ Tree::~Tree()
 	
 }
 
+void Tree::add_point(const float* features, bool value)
+{
+	Point* new_point = new Point(this->dimension, features, value);
+	this->list_of_points.push_back(new_point);
+	this->root->add_point(new_point);
+}
+		
 bool Tree::decision(const float* features)
 {
 	return this->root->decision(features);
