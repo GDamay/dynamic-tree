@@ -14,7 +14,7 @@ all: $(EXEC_FILE)
 $(EXEC_FILE): main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
 	$(LINKER) $(LINK_OUT)$(EXEC_FILE) main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
 
-main$(OBJ_EXT): main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h
+main$(OBJ_EXT): main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h Models/Tree/Tree.h
 	$(GXX) -c main.cpp
 
 Point$(OBJ_EXT): Models/PointSet/Point.h Models/PointSet/Point.cpp
