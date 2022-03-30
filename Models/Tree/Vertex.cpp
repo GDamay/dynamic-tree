@@ -36,6 +36,13 @@ void Vertex::build()
 	}
 }
 
+void Vertex::add_point(Point* new_point)
+{
+	this->pointset->add_point(new_point);
+	if(!this->is_leaf)
+		(*new_point)[split_parameter] == 0 ? this->under_child->add_point(new_point) : this->over_child->add_point(new_point);
+}
+
 bool Vertex::decision(const float* features)
 {
 	this->build();
