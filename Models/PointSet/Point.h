@@ -13,6 +13,12 @@ class Point {
 	public:
 		Point(const int dimension, const float* features, const bool value);
 		Point& operator=(const Point& source);
+		
+		// For  multiset.
+		// This is smaller if the first non-equal feature is smaller
+		// Or all features are equals and value is smaller 
+		bool operator<(const Point& other);
+		bool operator==(const Point& other);
 		Point(const Point& source);
 		~Point();
 		

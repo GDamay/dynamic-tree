@@ -20,6 +20,24 @@ Point& Point::operator=(const Point& source)
 	return *this;
 }
 
+bool Point::operator<(const Point& other)
+{
+	for(size_t i = 0; i < dimension; i++)
+		if(this->features[i] < other.features[i])
+			return true;
+		else if(this->features[i] > other.features[i])
+			return false;
+	return this->value < other.value;
+}
+
+bool Point::operator==(const Point& other)
+{
+	for(size_t i = 0; i < dimension; i++)
+		if(this->features[i] != other.features[i])
+			return false;
+	return this->value == other.value;
+}
+
 Point::Point(const Point& source)
 {
 	this->dimension = source.dimension;
