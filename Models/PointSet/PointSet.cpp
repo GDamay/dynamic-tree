@@ -66,6 +66,8 @@ PointSet::~PointSet()
 	}
 }
 
+unsigned int PointSet::get_size() { return this->points.size();}
+
 float PointSet::get_positive_proportion()
 {
 	if(!this->is_positive_proportion_calculated)

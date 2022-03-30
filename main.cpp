@@ -5,6 +5,8 @@
 #include "Models/Tree/Vertex.h"
 #include "Models/Tree/Tree.h"
 #define DIMENSION 3
+#define EPSILON 0.2
+#define MAX_HEIGHT 5
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -27,13 +29,13 @@ int main(int argc, char *argv[])
     auto test_splited = test_pointset->split_at_best();
     std::cout<< test_splited[0]->get_gini() << " " << test_splited[1]->get_gini()  << std::endl;
 
-    Vertex root(test_pointset, NULL, 5, true);
+    Vertex root(test_pointset, NULL, 5, EPSILON, true);
 
     value[1] = 0.0; value[2] = 0.0;
     Point challenge_point(DIMENSION, value, false);
     std::cout << root.decision(value) << std::endl;
 
-	Tree test_tree(list_of_points, DIMENSION, 5);
+	Tree test_tree(list_of_points, DIMENSION, MAX_HEIGHT, EPSILON);
 	std::cout << test_tree.decision(value) << std::endl;
 
 	test_tree.add_point(value, true);

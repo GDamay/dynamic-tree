@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "Vertex.h"
-#include "../PointSet/Point.h",
+#include "../PointSet/Point.h"
 
 class Tree {
 	private:
@@ -12,9 +12,10 @@ class Tree {
 		std::vector<Point*> list_of_points;
 		size_t dimension;
 		size_t max_height;
+		float epsilon;
 	public:
 		//Takes ownership
-		Tree(std::vector<Point*> list_of_points, size_t dimension, size_t max_height);
+		Tree(std::vector<Point*> list_of_points, size_t dimension, size_t max_height, float epsilon);
 		~Tree();
 		
 		void add_point(const float* features, bool value);

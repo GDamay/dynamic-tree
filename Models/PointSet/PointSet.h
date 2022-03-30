@@ -32,6 +32,8 @@ class PointSet {
 		PointSet(const PointSet& source);
 		PointSet& operator=(const PointSet& source);
 		~PointSet();
+
+		unsigned int get_size();
 		float get_positive_proportion();
 		float get_gini();
 		
