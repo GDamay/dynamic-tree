@@ -34,6 +34,8 @@ class Vertex {
 		void build();
 		//Return threshold of size to rebuild, or 0 if no rebuild is needed
 		unsigned int add_point(Point* new_point);
+		//Return threshold of size to rebuild, or 0 if no rebuild is needed
+		unsigned int delete_point(Point* old_point);
 		
 		//Does not take ownership
 		bool decision(const float* features);

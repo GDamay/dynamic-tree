@@ -157,6 +157,20 @@ void PointSet::add_point(Point* new_point)
 	this->is_gain_calculated = false;
 }
 
+
+void PointSet::delete_point(Point* old_point)
+{
+	this->points.erase(old_point);
+	if(this->is_positive_proportion_calculated)
+	{
+		this->positive_counter -= old_point->get_value();
+		this->positive_proportion = (float)this->positive_counter / (float)this->points.size();
+		this->is_gini_calculated = false;
+	}
+	//TODO Check if more efficient to keep arrays up to date
+	this->is_gain_calculated = false;
+}
+
 size_t PointSet::get_best_index()
 {
 	this->get_gini_gain();

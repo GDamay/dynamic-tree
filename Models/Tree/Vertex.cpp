@@ -78,6 +78,37 @@ unsigned int Vertex::add_point(Point* new_point)
 				return 0;
 		}
 	}
+	return 0;
+}
+
+unsigned int Vertex::delete_point(Point* old_point)
+{
+	this->pointset->delete_point(old_point);
+	if(!this->is_to_build && !this->is_leaf)
+	{
+		this->updates_since_last_build++;
+		if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
+		{
+			this->is_to_build = true;
+
+			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
+			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
+			return (unsigned int)(pow(1.0+epsilon, ceil(log(this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
+		}
+		else
+		{
+			unsigned int threshold = (*old_point)[split_parameter] == 0 ? this->under_child->delete_point(old_point) : this->over_child->delete_point(old_point);
+			if(threshold > 0 && this->pointset->get_size() < threshold)
+			{
+				// TODO Ensure that we can rebuild only when decision called (more efficient) instead of rebuilding right away (stick to the article)
+				this->is_to_build = true;
+				return threshold;
+			}
+			else
+				return 0;
+		}
+	}
+	return 0;
 }
 
 bool Vertex::decision(const float* features)

@@ -40,6 +40,10 @@ int main(int argc, char *argv[])
 
 	test_tree.add_point(value, true);
     std::cout << test_tree.decision(value) << std::endl;
+
+	test_tree.delete_point(value, true);
+    std::cout << test_tree.decision(value) << std::endl;
+
     delete test_splited[0];
     delete test_splited[1];
     return 0;

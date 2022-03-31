@@ -25,8 +25,19 @@ void Tree::add_point(const float* features, bool value)
 	this->list_of_points.insert(new_point);
 	this->root->add_point(new_point);
 }
+
+void Tree::delete_point(const float* features, bool value)
+{
+	Point pattern_to_delete(this->dimension, features, value);
+	auto it_to_delete = this->list_of_points.find(&pattern_to_delete);
+	if(it_to_delete == this->list_of_points.end())
+		throw "Error : Point does not exists";
+	this->root->delete_point(*it_to_delete);
+	delete *it_to_delete;
+	this->list_of_points.erase(it_to_delete);
+}
 		
 bool Tree::decision(const float* features)
 {
 	return this->root->decision(features);
-}	
+}

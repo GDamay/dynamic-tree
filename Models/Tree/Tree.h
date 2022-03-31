@@ -23,6 +23,7 @@ class Tree {
 		~Tree();
 		
 		void add_point(const float* features, bool value);
+		void delete_point(const float* features, bool value);
 		bool decision(const float* features);		
 };
 #endif // TREE_H_INCLUDED
