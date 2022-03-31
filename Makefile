@@ -3,7 +3,7 @@ GXX=g++
 LINKER=g++
 EXEC_FILE=dynamic_tree.exe
 EXEC_COMMAND="./"
-LINK_OUT="-o "
+LINK_OUT=-o 
 OBJ_EXT=.o
 
 run: all
