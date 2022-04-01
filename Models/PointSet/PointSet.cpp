@@ -182,7 +182,6 @@ void PointSet::add_point(Point* new_point)
 		this->positive_proportion = (float)this->positive_counter / (float)this->points.size();
 		this->is_gini_calculated = false;
 	}
-	//TODO Check if more efficient to keep arrays up to date
 	this->is_gain_calculated = false;
 }
 
@@ -196,7 +195,6 @@ void PointSet::delete_point(Point* old_point)
 		this->positive_proportion = (float)this->positive_counter / (float)this->points.size();
 		this->is_gini_calculated = false;
 	}
-	//TODO Check if more efficient to keep arrays up to date
 	this->is_gain_calculated = false;
 }
 
