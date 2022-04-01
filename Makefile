@@ -1,33 +1,52 @@
-RM=rm -f
+RM=rm -rf
 GXX=g++
 LINKER=g++
 EXEC_FILE=dynamic_tree.exe
-EXEC_COMMAND="./"
 LINK_OUT=-o 
 OBJ_EXT=.o
+BIN_ROOT=build/
+
+ifdef DEBUG
+	CFLAGS=-Wall -g -c
+	BIN_FOLDER=$(BIN_ROOT)debug/
+	EXEC_COMMAND=gdb 
+else
+	CFLAGS=-Wall -c
+	BIN_FOLDER=$(BIN_ROOT)release/
+	EXEC_COMMAND="./"
+endif
+
+ifdef BIN_FOLDER
+	MK_FOLDER=mkdir -p $(BIN_FOLDER)
+endif
 
 run: all
-	$(EXEC_COMMAND)$(EXEC_FILE)
+	$(EXEC_COMMAND)$(BIN_FOLDER)$(EXEC_FILE)
 
-all: $(EXEC_FILE)
+rebuild: clean all
 
-$(EXEC_FILE): main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
-	$(LINKER) $(LINK_OUT)$(EXEC_FILE) main$(OBJ_EXT) Point$(OBJ_EXT) PointSet$(OBJ_EXT) Vertex$(OBJ_EXT) Tree$(OBJ_EXT)
+all: pre_build $(BIN_FOLDER)$(EXEC_FILE)
 
-main$(OBJ_EXT): main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h Models/Tree/Tree.h
-	$(GXX) -c main.cpp
+$(BIN_FOLDER)$(EXEC_FILE): $(BIN_FOLDER)main$(OBJ_EXT) $(BIN_FOLDER)Point$(OBJ_EXT) $(BIN_FOLDER)PointSet$(OBJ_EXT) $(BIN_FOLDER)Vertex$(OBJ_EXT) $(BIN_FOLDER)Tree$(OBJ_EXT)
+	$(LINKER) $(LINK_OUT)$@ $^
 
-Point$(OBJ_EXT): Models/PointSet/Point.h Models/PointSet/Point.cpp
-	$(GXX) -c Models/PointSet/Point.cpp
+$(BIN_FOLDER)main$(OBJ_EXT): main.cpp Models/PointSet/Point.h Models/PointSet/PointSet.h Models/Tree/Tree.h
+	$(GXX) $(LINK_OUT)$@ $(CFLAGS) $<
 
-PointSet$(OBJ_EXT): Models/PointSet/Point.h Models/PointSet/PointSet.h Models/PointSet/PointSet.cpp
-	$(GXX) -c Models/PointSet/PointSet.cpp
+$(BIN_FOLDER)Point$(OBJ_EXT): Models/PointSet/Point.cpp Models/PointSet/Point.h
+	$(GXX) $(LINK_OUT)$@ $(CFLAGS) $<
 
-Vertex$(OBJ_EXT): Models/Tree/Vertex.cpp Models/Tree/Vertex.h Models/PointSet/Point.h Models/PointSet/PointSet.h
-	$(GXX) -c Models/Tree/Vertex.cpp
+$(BIN_FOLDER)PointSet$(OBJ_EXT): Models/PointSet/PointSet.cpp Models/PointSet/PointSet.h Models/PointSet/Point.h
+	$(GXX) $(LINK_OUT)$@ $(CFLAGS) $<
 
-Tree$(OBJ_EXT): Models/Tree/Tree.cpp Models/Tree/Tree.h Models/Tree/Vertex.h Models/PointSet/PointSet.h Models/PointSet/Point.h
-	$(GXX) -c Models/Tree/Tree.cpp
+$(BIN_FOLDER)Vertex$(OBJ_EXT): Models/Tree/Vertex.cpp Models/Tree/Vertex.h Models/PointSet/Point.h Models/PointSet/PointSet.h
+	$(GXX) $(LINK_OUT)$@ $(CFLAGS) $<
+
+$(BIN_FOLDER)Tree$(OBJ_EXT): Models/Tree/Tree.cpp Models/Tree/Tree.h Models/Tree/Vertex.h Models/PointSet/PointSet.h Models/PointSet/Point.h
+	$(GXX) $(LINK_OUT)$@ $(CFLAGS) $<
 
 clean:
-	$(RM) *$(OBJ_EXT) *.exe
+	$(RM) $(BIN_ROOT)
+
+pre_build:
+		$(MK_FOLDER)
