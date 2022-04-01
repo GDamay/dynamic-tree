@@ -4,11 +4,11 @@
 
 
 Vertex::Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, float epsilon, bool is_root) :
-	pointset(pointset),
-	parent(parent),
+	is_root(is_root),
 	remaining_high(remaining_high),
 	epsilon(epsilon),
-	is_root(is_root)
+	parent(parent),
+	pointset(pointset)
 {
 	this->is_to_build = true;
 	this->is_to_clean = false;
