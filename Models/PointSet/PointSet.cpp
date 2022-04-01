@@ -1,6 +1,8 @@
 #include "PointSet.h"
 #include <math.h>
 #include <cstring>
+#include <vector>
+#include <algorithm> // std::sort
 
 PointSet::PointSet(std::multiset<Point*> points, size_t dimension) : points(points)
 {
@@ -14,20 +16,18 @@ PointSet::PointSet(const PointSet& source) : points(source.points), dimension(so
 	this->is_positive_proportion_calculated = source.is_positive_proportion_calculated;
 	this->is_gini_calculated = source.is_gini_calculated;
 	this->is_gain_calculated = source.is_gain_calculated;
+	this->positive_counter = source.positive_counter;
 	this->positive_proportion = source.positive_proportion;
 	this->gini = source.gini;
 	if(source.is_gain_calculated)
 	{
-		this->under_counter = new int[this->dimension];
-		this->under_positive_counter = new int[this->dimension];
-		this->over_counter = new int[this->dimension];
-		this->over_positive_counter = new int[this->dimension];
-		this->gini_gain = new float[this->dimension];
-		memcpy(this->under_counter, source.under_counter, source.dimension*sizeof(int));
-		memcpy(this->under_positive_counter, source.under_positive_counter, source.dimension*sizeof(int));
-		memcpy(this->over_counter, source.over_counter, source.dimension*sizeof(int));
-		memcpy(this->over_positive_counter, source.over_positive_counter, source.dimension*sizeof(int));
-		memcpy(this->gini_gain, source.gini_gain, source.dimension*sizeof(float));
+		this->best_under_counter = source.best_under_counter;
+		this->best_under_positive_counter = source.best_under_positive_counter;
+		this->best_over_counter = source.best_over_counter;
+		this->best_over_positive_counter = source.best_over_positive_counter;
+		this->best_gain = source.best_gain;
+		this->best_parameter = source.best_parameter;
+		this->best_threshold = source.best_threshold;
 	}
 	
 }
@@ -36,35 +36,24 @@ PointSet& PointSet::operator=(const PointSet& source)
 	this->is_positive_proportion_calculated = source.is_positive_proportion_calculated;
 	this->is_gini_calculated = source.is_gini_calculated;
 	this->is_gain_calculated = source.is_gain_calculated;
+	this->positive_counter = source.positive_counter;
 	this->positive_proportion = source.positive_proportion;
 	this->gini = source.gini;
 	if(source.is_gain_calculated)
 	{
-		this->under_counter = new int[this->dimension];
-		this->under_positive_counter = new int[this->dimension];
-		this->over_counter = new int[this->dimension];
-		this->over_positive_counter = new int[this->dimension];
-		this->gini_gain = new float[this->dimension];
-		memcpy(this->under_counter, source.under_counter, source.dimension*sizeof(int));
-		memcpy(this->under_positive_counter, source.under_positive_counter, source.dimension*sizeof(int));
-		memcpy(this->over_counter, source.over_counter, source.dimension*sizeof(int));
-		memcpy(this->over_positive_counter, source.over_positive_counter, source.dimension*sizeof(int));
-		memcpy(this->gini_gain, source.gini_gain, source.dimension*sizeof(float));
+		this->best_under_counter = source.best_under_counter;
+		this->best_under_positive_counter = source.best_under_positive_counter;
+		this->best_over_counter = source.best_over_counter;
+		this->best_over_positive_counter = source.best_over_positive_counter;
+		this->best_gain = source.best_gain;
+		this->best_parameter = source.best_parameter;
+		this->best_threshold = source.best_threshold;
 	}
 	return *this;	
 }
 
 PointSet::~PointSet()
-{
-	if(this->is_gain_calculated)
-	{
-		delete this->under_counter;
-		delete this->under_positive_counter;
-		delete this->over_counter;
-		delete this->over_positive_counter;
-		delete this->gini_gain;
-	}
-}
+{}
 
 unsigned int PointSet::get_size() { return this->points.size();}
 
@@ -91,57 +80,97 @@ float PointSet::get_gini()
 	return this->gini;
 }
 
-float* PointSet::get_gini_gain()
+void PointSet::calculate_best_gain()
 {
-	if(!is_gain_calculated)
+	if(!this->is_gain_calculated)
 	{
-		this->under_counter = new int[this->dimension];
-		this->under_positive_counter = new int[this->dimension];
-		this->over_counter = new int[this->dimension];
-		this->over_positive_counter = new int[this->dimension];
-		this->gini_gain = new float[this->dimension];
 		if(this->points.empty())
 		{
-			std::fill_n(under_counter, this->dimension, 0);
-			std::fill_n(under_positive_counter, this->dimension, 0);
-			std::fill_n(over_counter, this->dimension, 0);
-			std::fill_n(over_positive_counter, this->dimension, 0);
+			this->best_under_counter = 0;
+			this->best_under_positive_counter = 0;
+			this->best_over_counter = 0;
+			this->best_over_positive_counter = 0;
 			this->best_gain = 0;
-			std::fill_n(gini_gain, this->dimension, 0);
+			this->best_parameter = 0;
+			this->best_threshold = 0;
 		}
 		else
 		{
-			auto it = this->points.begin();
-			for(size_t i_dimension = 0; i_dimension < dimension; i_dimension++)
+			this->get_positive_proportion(); // To have positive_counter up to date
+			std::vector<Point*> points_vector(this->points.begin(), this->points.end());
+			unsigned int under_counter;
+			unsigned int under_positive_counter;
+			unsigned int over_counter;
+			unsigned int over_positive_counter;
+			float current_param_value;
+			float fraction_under, fraction_over;
+			float current_gain;
+			this->best_gain = NAN;
+			this->best_threshold = NAN;
+			this->best_parameter = 0;
+			for(size_t current_dim = 0; current_dim < this->dimension; current_dim++)
 			{
-				this->under_counter[i_dimension]=(*it)->get_feature(i_dimension)==0;
-				this->under_positive_counter[i_dimension]=(*it)->get_feature(i_dimension)==0 && (*it)->get_value();
-				this->over_counter[i_dimension]=(*it)->get_feature(i_dimension)>0;
-				this->over_positive_counter[i_dimension]=(*it)->get_feature(i_dimension)>0 && (*it)->get_value();
-			}
-			for(++it; it != this->points.end(); it++)
-			{
-				for(size_t i_dimension = 0; i_dimension < dimension; i_dimension++)
+				std::sort(points_vector.begin(), points_vector.end(), [current_dim](Point* const &a, Point* const &b) { return (*a)[current_dim] < (*b)[current_dim]; });
+				under_counter = 1;
+				under_positive_counter = points_vector[0]->get_value();
+				over_counter = this->points.size() - 1;
+				over_positive_counter = this->positive_counter - points_vector[0]->get_value();
+				for(auto it = points_vector.begin(); it != points_vector.end();)
 				{
-					this->under_counter[i_dimension]+=(*it)->get_feature(i_dimension)==0;
-					this->under_positive_counter[i_dimension]+=(*it)->get_feature(i_dimension)==0 && (*it)->get_value();
-					this->over_counter[i_dimension]+=(*it)->get_feature(i_dimension)>0;
-					this->over_positive_counter[i_dimension]+=(*it)->get_feature(i_dimension)>0 && (*it)->get_value();
-				}
-			}
-			this->best_gain = 0;
-			for(size_t i_dimension = 0; i_dimension < dimension; i_dimension++)
-			{
-				float fraction_under = (float)this->under_positive_counter[i_dimension]/(float)this->under_counter[i_dimension];
-				float fraction_over = (float)this->over_positive_counter[i_dimension]/(float)this->over_counter[i_dimension];
-				this->gini_gain[i_dimension] = -(fraction_under*(1-fraction_under) + fraction_over*(1-fraction_over));
-				if(isnan(this->gini_gain[this->best_gain]) || this->gini_gain[i_dimension] > this->gini_gain[this->best_gain])
-					this->best_gain = i_dimension;
-			}
-		}
+					current_param_value = (*it)->get_feature(current_dim);
+
+					// At the end of the loop, "it" is on the first point for which the feature is not equal,
+					// but the counters don't take that last point into account yet
+					for(it++;  it != points_vector.end() && (*it)->get_feature(current_dim) == current_param_value; it++)
+					{
+						under_counter++;
+						under_positive_counter += (*it)->get_value();
+						over_counter--;
+						over_positive_counter -= (*it)->get_value();
+					}
+					if(it != points_vector.end())
+					{
+						fraction_under = under_positive_counter/under_counter;
+						fraction_over = over_positive_counter/over_counter;
+						current_gain = -(fraction_under*(1-fraction_under) + fraction_over*(1-fraction_over));
+						if(isnan(this->best_gain) || current_gain > this->best_gain)
+						{
+							this->best_under_counter = under_counter;
+							this->best_under_positive_counter = under_positive_counter;
+							this->best_over_counter = over_counter;
+							this->best_over_positive_counter = over_positive_counter;
+							this->best_gain = current_gain;
+							this->best_parameter = current_dim;
+							this->best_threshold = (current_param_value + (*it)->get_feature(current_dim))/2;
+						} // If Best param/threshold
+						under_counter++;
+						under_positive_counter += (*it)->get_value();
+						over_counter--;
+						over_positive_counter -= (*it)->get_value();
+					} // If iterator not at end
+				} // For points in vector
+			} // For all dimensions
+		} // Else (of "if empty set of points")
 		this->is_gain_calculated = true;
-	}
-	return this->gini_gain;
+	} // If not calculated yet
+}
+
+size_t PointSet::get_best_index()
+{
+	this->calculate_best_gain();
+	return this->best_gain;
+}
+
+float PointSet::get_best_gain()
+{
+	this->calculate_best_gain();
+	return this->gini + (float)2/(float)this->points.size()*this->best_gain;
+}
+
+float PointSet::get_best_threshold()
+{
+	this->calculate_best_gain();
+	return this->best_threshold;
 }
 
 void PointSet::add_point(Point* new_point)
@@ -171,36 +200,24 @@ void PointSet::delete_point(Point* old_point)
 	this->is_gain_calculated = false;
 }
 
-size_t PointSet::get_best_index()
-{
-	this->get_gini_gain();
-	return this->best_gain;
-}
-
-float PointSet::get_best_gain()
-{
-	this->get_gini_gain();
-	return this->gini + (float)2/(float)this->points.size()*this->gini_gain[this->best_gain];
-}
-
 std::array<PointSet*, 2> PointSet::split_at_best()
 {
-	this->get_gini_gain();
+	this->calculate_best_gain();
 	std::multiset<Point*> points_under;
 	std::multiset<Point*> points_over;
 	auto it_under = points_under.begin();
 	auto it_over = points_over.begin();
 	for(auto it = this->points.begin(); it != this->points.end(); it++)
-		if((*it)->get_feature(this->best_gain) == 0)
+		if((*it)->get_feature(this->best_gain) <= this->best_threshold)
 			it_under = points_under.insert(it_under, *it);
 		else
 			it_over = points_over.insert(it_over, *it);
 	std::array<PointSet*, 2> to_return = {new PointSet(points_under, this->dimension), new PointSet(points_over, this->dimension)};
-	to_return[0]->positive_proportion = this->under_counter[this->best_gain] == 0 ? 0 :
-		(float)this->under_positive_counter[this->best_gain]/(float)this->under_counter[this->best_gain];
+	to_return[0]->positive_proportion = this->best_under_counter == 0 ? 0 :
+		(float)this->best_under_positive_counter/(float)this->best_under_counter;
 	to_return[0]->is_positive_proportion_calculated = true;
-	to_return[1]->positive_proportion = this->over_counter[this->best_gain] == 0 ? 0 :
-		(float)this->over_positive_counter[this->best_gain]/(float)this->over_counter[this->best_gain];
+	to_return[1]->positive_proportion = this->best_over_counter == 0 ? 0 :
+		(float)this->best_over_positive_counter/(float)this->best_over_counter;
 	to_return[1]->is_positive_proportion_calculated = true;
 	
 	return to_return;

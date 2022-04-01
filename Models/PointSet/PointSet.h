@@ -16,16 +16,22 @@ class PointSet {
 		float gini;
 		bool is_gini_calculated;
 		//used for keeping track of number of points <= threashold (0 for first version) for each parameter
-		int *under_counter;
+		int best_under_counter;
 		//used for keeping track of number of positive points <= threashold (0 for first version) for each parameter
-		int *under_positive_counter;
+		int best_under_positive_counter;
 		//used for keeping track of number of points > threashold (0 for first version) for each parameter
-		int *over_counter;
+		int best_over_counter;
 		//used for keeping track of number of positive points > threashold (0 for first version) for each parameter
-		int *over_positive_counter;
-		float* gini_gain;
-		size_t best_gain;
+		int best_over_positive_counter;
+
+		// Proxy lineraly dependant on real gain
+		float best_gain;
+
+		size_t best_parameter;
+		float best_threshold;
 		bool is_gain_calculated;
+
+		void calculate_best_gain();
 	
 	public:
 		PointSet(std::multiset<Point*> points, size_t dimension);
@@ -36,14 +42,11 @@ class PointSet {
 		unsigned int get_size();
 		float get_positive_proportion();
 		float get_gini();
-		
-		//Warning : keeps ownership !
-		//Does not provide true gain, but proxy linearly dependant
-		float* get_gini_gain();
-		
-		//Does provide true best gain
+
+		// Provides true best gain, not proxy
 		float get_best_gain();
 		size_t get_best_index();
+		float get_best_threshold();
 
 		void add_point(Point* new_point);
 		void delete_point(Point* old_point);

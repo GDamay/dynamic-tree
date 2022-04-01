@@ -15,6 +15,7 @@ class Vertex {
 		bool is_to_clean;
 
 		size_t split_parameter;
+		float split_threshold;
 		unsigned int remaining_high;
 		unsigned int updates_since_last_build;
 		float epsilon;

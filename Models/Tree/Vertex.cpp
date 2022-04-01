@@ -41,6 +41,7 @@ void Vertex::build()
 		{
 			this->is_leaf = false;
 			this->split_parameter = this->pointset->get_best_index();
+			this->split_threshold = this->pointset->get_best_threshold();
 			auto subsets = this->pointset->split_at_best();
 			this->under_child = new Vertex(subsets[0], this, remaining_high-1, this->epsilon);
 			this->over_child = new Vertex(subsets[1], this, remaining_high-1, this->epsilon);
@@ -67,7 +68,7 @@ unsigned int Vertex::add_point(Point* new_point)
 		}
 		else
 		{
-			unsigned int threshold = (*new_point)[split_parameter] == 0 ? this->under_child->add_point(new_point) : this->over_child->add_point(new_point);
+			unsigned int threshold = (*new_point)[split_parameter] <= split_threshold ? this->under_child->add_point(new_point) : this->over_child->add_point(new_point);
 			if(threshold > 0 && this->pointset->get_size() < threshold)
 			{
 				// TODO Ensure that we can rebuild only when decision called (more efficient) instead of rebuilding right away (stick to the article)
@@ -97,7 +98,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 		}
 		else
 		{
-			unsigned int threshold = (*old_point)[split_parameter] == 0 ? this->under_child->delete_point(old_point) : this->over_child->delete_point(old_point);
+			unsigned int threshold = (*old_point)[split_parameter] <= split_threshold ? this->under_child->delete_point(old_point) : this->over_child->delete_point(old_point);
 			if(threshold > 0 && this->pointset->get_size() < threshold)
 			{
 				// TODO Ensure that we can rebuild only when decision called (more efficient) instead of rebuilding right away (stick to the article)
@@ -117,5 +118,5 @@ bool Vertex::decision(const float* features)
 	if(this->is_leaf)
 		return this->pointset->get_positive_proportion() >= 0.5;
 	else
-		return features[this->split_parameter] == 0 ? this->under_child->decision(features) : this->over_child->decision(features);
+		return features[this->split_parameter] <= split_threshold ? this->under_child->decision(features) : this->over_child->decision(features);
 }
