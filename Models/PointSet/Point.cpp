@@ -22,7 +22,7 @@ Point& Point::operator=(const Point& source)
 
 bool Point::operator<(const Point& other) const
 {
-	for(size_t i = 0; i < dimension; i++)
+	for(size_t i = 0; i < (size_t)dimension; i++)
 		if(this->features[i] < other.features[i])
 			return true;
 		else if(this->features[i] > other.features[i])
@@ -32,7 +32,7 @@ bool Point::operator<(const Point& other) const
 
 bool Point::operator==(const Point& other) const
 {
-	for(size_t i = 0; i < dimension; i++)
+	for(size_t i = 0; i < (size_t)dimension; i++)
 		if(this->features[i] != other.features[i])
 			return false;
 	return this->value == other.value;
@@ -63,7 +63,7 @@ bool Point::get_value()
 
 float Point::get_feature(std::size_t position)
 {
-	if(position < dimension)
+	if(position < (size_t)dimension)
 		return this->features[position];
 	else
 		throw std::out_of_range("position should be less than dimension");
