@@ -9,10 +9,6 @@ class Vertex {
 	private:
 		bool is_leaf;
 		bool is_root;
-		bool is_to_build;
-
-		// If has already been built
-		bool is_to_clean;
 
 		size_t split_parameter;
 		float split_threshold;
