@@ -46,5 +46,6 @@ int main(int argc, char *argv[])
 
     delete test_splited[0];
     delete test_splited[1];
+    Point bla("1;2;3;4", 3, ';', 0, 1);
     return 0;
 }

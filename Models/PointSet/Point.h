@@ -3,6 +3,7 @@
 #define POINT_H_INCLUDED
 
 #include <array>
+#include <string>
 
 class Point {
 	private:
@@ -12,6 +13,8 @@ class Point {
 	
 	public:
 		Point(const int dimension, const float* features, const bool value);
+		// dimension is the dimension of the features, should be number of parameters + 1
+		Point(std::string input, int dimension, char delimiter, unsigned int label_position, float label_true_value);
 		Point& operator=(const Point& source);
 		
 		// For  multiset.
