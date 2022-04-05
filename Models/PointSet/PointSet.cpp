@@ -213,9 +213,11 @@ std::array<PointSet*, 2> PointSet::split_at_best()
 	std::array<PointSet*, 2> to_return = {new PointSet(points_under, this->dimension), new PointSet(points_over, this->dimension)};
 	to_return[0]->positive_proportion = this->best_under_counter == 0 ? 0 :
 		(float)this->best_under_positive_counter/(float)this->best_under_counter;
+	to_return[0]->positive_counter = this->best_under_positive_counter;
 	to_return[0]->is_positive_proportion_calculated = true;
 	to_return[1]->positive_proportion = this->best_over_counter == 0 ? 0 :
 		(float)this->best_over_positive_counter/(float)this->best_over_counter;
+	to_return[1]->positive_counter = this->best_over_positive_counter;
 	to_return[1]->is_positive_proportion_calculated = true;
 	
 	return to_return;
