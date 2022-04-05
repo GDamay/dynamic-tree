@@ -45,7 +45,9 @@ int main(int argc, char *argv[])
     std::cout << test_tree.decision(value) << std::endl;
 
     delete test_splited[0];
+    test_splited[0] = NULL;
     delete test_splited[1];
+    test_splited[1] = NULL;
     Point bla("1;2;3;4", 3, ';', 0, 1);
     return 0;
 }
