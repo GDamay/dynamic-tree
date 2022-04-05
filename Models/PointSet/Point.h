@@ -7,14 +7,14 @@
 
 class Point {
 	private:
-		int dimension;
+		size_t dimension;
 		float* features;
 		bool value;
 	
 	public:
-		Point(const int dimension, const float* features, const bool value);
+		Point(size_t dimension, const float* features, const bool value);
 		// dimension is the dimension of the features, should be number of parameters + 1
-		Point(std::string input, int dimension, char delimiter, unsigned int label_position, float label_true_value);
+		Point(std::string input, size_t dimension, char delimiter, unsigned int label_position, float label_true_value);
 		Point& operator=(const Point& source);
 		
 		// For  multiset.
@@ -25,7 +25,7 @@ class Point {
 		Point(const Point& source);
 		~Point();
 		
-		int get_dimension();
+		size_t get_dimension();
 		bool get_value();
 		float get_feature(std::size_t position);
 		float operator[](std::size_t position);

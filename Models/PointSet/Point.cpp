@@ -3,7 +3,7 @@
 #include <cstring>
 #include <stdexcept>
 
-Point::Point(const int dimension, const float* features, const bool value)
+Point::Point(size_t dimension, const float* features, const bool value)
 {
 	this->dimension = dimension;
 	this-> value = value;
@@ -11,14 +11,14 @@ Point::Point(const int dimension, const float* features, const bool value)
 	memcpy(this->features, features, dimension*sizeof(float));
 }
 
-Point::Point(std::string input, int dimension, char delimiter, unsigned int label_position, float label_true_value)
+Point::Point(std::string input, size_t dimension, char delimiter, unsigned int label_position, float label_true_value)
 {
 	const char* c_input = input.c_str();
 	char* end;
 	this->dimension = dimension;
 	this->features = new float[dimension];
-	float value = std::strtod(c_input, &end);
-	for(unsigned int i = 0; (int)i <= dimension; value = std::strtod(c_input, &end), i++)
+	float value = std::strtof(c_input, &end);
+	for(unsigned int i = 0; (int)i <= dimension; value = std::strtof(c_input, &end), i++)
 	{
 		if(c_input == end)
 			throw std::runtime_error("Wrong feature formatting : to few parameters or unexpected char");
@@ -70,7 +70,7 @@ Point::~Point()
 	delete this->features;
 }
 
-int Point::get_dimension()
+size_t Point::get_dimension()
 {
 	return this->dimension;
 }
@@ -82,7 +82,7 @@ bool Point::get_value()
 
 float Point::get_feature(std::size_t position)
 {
-	if(position < (size_t)dimension)
+	if(position < dimension)
 		return this->features[position];
 	else
 		throw std::out_of_range("position should be less than dimension");

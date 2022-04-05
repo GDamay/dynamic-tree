@@ -55,7 +55,7 @@ PointSet& PointSet::operator=(const PointSet& source)
 PointSet::~PointSet()
 {}
 
-unsigned int PointSet::get_size() { return this->points.size();}
+size_t PointSet::get_size() { return this->points.size();}
 
 float PointSet::get_positive_proportion()
 {
@@ -113,7 +113,7 @@ void PointSet::calculate_best_gain()
 				std::sort(points_vector.begin(), points_vector.end(), [current_dim](Point* const &a, Point* const &b) { return (*a)[current_dim] < (*b)[current_dim]; });
 				under_counter = 1;
 				under_positive_counter = points_vector[0]->get_value();
-				over_counter = this->points.size() - 1;
+				over_counter = (unsigned int)this->points.size() - 1;
 				over_positive_counter = this->positive_counter - points_vector[0]->get_value();
 				for(auto it = points_vector.begin(); it != points_vector.end();)
 				{
@@ -130,8 +130,8 @@ void PointSet::calculate_best_gain()
 					}
 					if(it != points_vector.end())
 					{
-						fraction_under = under_positive_counter/under_counter;
-						fraction_over = over_positive_counter/over_counter;
+						fraction_under = (float)under_positive_counter/(float)under_counter;
+						fraction_over = (float)over_positive_counter/(float)over_counter;
 						current_gain = -(fraction_under*(1-fraction_under) + fraction_over*(1-fraction_over));
 						if(isnan(this->best_gain) || current_gain > this->best_gain)
 						{

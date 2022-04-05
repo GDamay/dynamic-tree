@@ -59,7 +59,7 @@ unsigned int Vertex::add_point(Point* new_point)
 
 			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
 			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-			return (unsigned int)(pow(1.0+epsilon, ceil(log(this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
+			return (unsigned int)(pow(1.0+epsilon, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
 		}
 		else
 		{
@@ -93,7 +93,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 
 			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
 			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-			return (unsigned int)(pow(1.0+epsilon, ceil(log(this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
+			return (unsigned int)(pow(1.0+epsilon, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
 		}
 		else
 		{

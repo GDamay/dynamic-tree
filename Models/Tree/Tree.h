@@ -19,7 +19,7 @@ class Tree {
 		float epsilon;
 	public:
 		//Takes ownership
-		Tree(std::multiset<Point*> list_of_points, size_t dimension, size_t max_height, float epsilon);
+		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon);
 		~Tree();
 		
 		void add_point(const float* features, bool value);

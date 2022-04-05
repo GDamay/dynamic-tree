@@ -4,9 +4,9 @@
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
 #include "Models/Tree/Tree.h"
-#define DIMENSION 3
-#define EPSILON 0.2
-#define MAX_HEIGHT 5
+constexpr auto DIMENSION = 3;
+constexpr float EPSILON = (float)0.2;
+constexpr auto MAX_HEIGHT = 5;
 using namespace std;
 
 int main(int argc, char *argv[])

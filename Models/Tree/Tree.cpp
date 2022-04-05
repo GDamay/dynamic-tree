@@ -1,7 +1,7 @@
 #include "Tree.h"
 #include "../PointSet/PointSet.h"
 
-Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, size_t max_height, float epsilon) :
+Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon) :
 	list_of_points(list_of_points.begin(), list_of_points.end()),
 	dimension(dimension),
 	max_height(max_height),
