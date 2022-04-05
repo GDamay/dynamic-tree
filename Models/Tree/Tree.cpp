@@ -26,6 +26,12 @@ void Tree::add_point(const float* features, bool value)
 	this->root->add_point(new_point);
 }
 
+void Tree::add_point(Point* to_add)
+{
+	this->list_of_points.insert(to_add);
+	this->root->add_point(to_add);
+}
+
 void Tree::delete_point(const float* features, bool value)
 {
 	Point pattern_to_delete(this->dimension, features, value);

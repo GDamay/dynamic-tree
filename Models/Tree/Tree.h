@@ -23,6 +23,8 @@ class Tree {
 		~Tree();
 		
 		void add_point(const float* features, bool value);
+		// Warning : Takes ownership !
+		void add_point(Point* to_add);
 		void delete_point(const float* features, bool value);
 		bool decision(const float* features);		
 };

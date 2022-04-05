@@ -21,7 +21,7 @@ Point::Point(std::string input, size_t dimension, char delimiter, unsigned int l
 	for(unsigned int i = 0; (int)i <= dimension; value = std::strtof(c_input, &end), i++)
 	{
 		if(c_input == end)
-			throw std::runtime_error("Wrong feature formatting : to few parameters or unexpected char");
+			throw std::runtime_error("Wrong feature formatting : to few parameters or unexpected char (string : '" + input + "')");
 		else if(i == label_position)
 			this->value = value == label_true_value;
 		else
