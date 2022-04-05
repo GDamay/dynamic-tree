@@ -158,7 +158,7 @@ void PointSet::calculate_best_gain()
 size_t PointSet::get_best_index()
 {
 	this->calculate_best_gain();
-	return this->best_gain;
+	return this->best_parameter;
 }
 
 float PointSet::get_best_gain()
@@ -206,7 +206,7 @@ std::array<PointSet*, 2> PointSet::split_at_best()
 	auto it_under = points_under.begin();
 	auto it_over = points_over.begin();
 	for(auto it = this->points.begin(); it != this->points.end(); it++)
-		if((*it)->get_feature(this->best_gain) <= this->best_threshold)
+		if((*it)->get_feature(this->best_parameter) <= this->best_threshold)
 			it_under = points_under.insert(it_under, *it);
 		else
 			it_over = points_over.insert(it_over, *it);
