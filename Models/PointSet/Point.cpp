@@ -25,7 +25,7 @@ Point::Point(std::string input, int dimension, char delimiter, unsigned int labe
 		else if(i == label_position)
 			this->value = value == label_true_value;
 		else
-			this->features[i + (i>label_position)] = value;
+			this->features[i - (i>label_position)] = value;
 		c_input = end + 1;
 	}
 }
