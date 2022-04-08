@@ -22,6 +22,8 @@ class Tree {
 		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon);
 		~Tree();
 		
+		std::string to_string();
+
 		void add_point(const float* features, bool value);
 		// Warning : Takes ownership !
 		void add_point(Point* to_add);

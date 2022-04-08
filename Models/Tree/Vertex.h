@@ -4,6 +4,7 @@
 
 #include "../PointSet/PointSet.h"
 #include "../PointSet/Point.h"
+#include <vector>
 
 class Vertex {
 	private:
@@ -33,6 +34,8 @@ class Vertex {
 		unsigned int add_point(Point* new_point);
 		//Return threshold of size to rebuild, or 0 if no rebuild is needed
 		unsigned int delete_point(Point* old_point);
+
+		std::vector<std::string> to_string();
 		
 		//Does not take ownership
 		bool decision(const float* features);

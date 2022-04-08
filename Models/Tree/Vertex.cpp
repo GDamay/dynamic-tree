@@ -121,3 +121,29 @@ bool Vertex::decision(const float* features)
 	else
 		return features[this->split_parameter] <= split_threshold ? this->under_child->decision(features) : this->over_child->decision(features);
 }
+
+std::vector<std::string> Vertex::to_string()
+{
+	if(this->is_leaf)
+	{
+		std::vector<std::string> to_return{"p=" + std::to_string(this->pointset->get_positive_proportion())+ "\n"};
+		return to_return;
+	}
+	else
+	{
+		std::string basis = "f=" + std::to_string(this->split_parameter) + ";t=" + std::to_string(this->split_threshold);
+		std::vector<std::string> to_return = this->over_child->to_string();
+		std::string it_over_str = std::string(basis.length()-1, ' ') + "|  " ;
+		auto it_over = to_return.begin();
+		*it_over = basis + "--" + *it_over;
+		for(++it_over; it_over != to_return.end(); it_over++)
+			*it_over = it_over_str + *it_over;
+		std::vector<std::string> under_str = this->under_child->to_string();
+		auto it_under = under_str.begin();
+		to_return.push_back(std::string(basis.length()-1, ' ') + "|--" + *it_under);
+		std::string it_under_str = std::string(basis.length()+2, ' ');
+		for(++it_under; it_under != under_str.end(); it_under++)
+			to_return.push_back(it_under_str + *it_under);
+		return to_return;
+	}
+}

@@ -135,5 +135,8 @@ int main(int argc, char *argv[])
                 label_true_value,
                 std::vector<size_t> {1, 2, 3, 4, 5}, std::vector<size_t> {4, 5, 6, 7, 8},
                 add_points, del_points);
+
+     std::cout << tree_from_file.to_string();
+
     return 0;
 }

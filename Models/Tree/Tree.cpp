@@ -1,5 +1,6 @@
 #include "Tree.h"
 #include "../PointSet/PointSet.h"
+#include <numeric>
 
 Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon) :
 	list_of_points(list_of_points.begin(), list_of_points.end()),
@@ -17,6 +18,12 @@ Tree::~Tree()
 	for(auto it = this->list_of_points.begin(); it != this->list_of_points.end(); it++)
 		delete *it;
 	
+}
+
+std::string Tree::to_string()
+{
+	std::vector<std::string> vec_of_res = this->root->to_string();
+	return std::accumulate(vec_of_res.begin(), vec_of_res.end(), std::string(""));
 }
 
 void Tree::add_point(const float* features, bool value)
