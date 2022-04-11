@@ -103,8 +103,8 @@ void PointSet::calculate_best_gain()
 			unsigned int over_counter;
 			unsigned int over_positive_counter;
 			float current_param_value;
-			float fraction_under, fraction_over;
-			float current_gain;
+			double fraction_under, fraction_over;
+			double current_gain;
 			this->best_gain = NAN;
 			this->best_threshold = NAN;
 			this->best_parameter = 0;
@@ -130,9 +130,9 @@ void PointSet::calculate_best_gain()
 					}
 					if(it != points_vector.end())
 					{
-						fraction_under = (float)under_positive_counter/(float)under_counter;
-						fraction_over = (float)over_positive_counter/(float)over_counter;
-						current_gain = -(fraction_under*(1-fraction_under) + fraction_over*(1-fraction_over));
+						fraction_under = (double)under_positive_counter/(double)under_counter;
+						fraction_over = (double)over_positive_counter/(double)over_counter;
+						current_gain = -((double)under_positive_counter*(1-fraction_under) + (double)over_positive_counter*(1-fraction_over));
 						if(isnan(this->best_gain) || current_gain > this->best_gain)
 						{
 							this->best_under_counter = under_counter;
