@@ -27,7 +27,9 @@ class Tree {
 		void add_point(const float* features, bool value);
 		// Warning : Takes ownership !
 		void add_point(Point* to_add);
+		void add_point(Point to_add);
 		void delete_point(const float* features, bool value);
+		void delete_point(Point to_delete);
 		bool decision(const float* features);		
 };
 #endif // TREE_H_INCLUDED

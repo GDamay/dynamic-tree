@@ -87,6 +87,10 @@ float Point::get_feature(std::size_t position)
 	else
 		throw std::out_of_range("position should be less than dimension");
 }
+const float* Point::get_features()
+{
+	return this->features;
+}
 
 float Point::operator[](std::size_t position)
 {

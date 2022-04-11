@@ -28,6 +28,7 @@ class Point {
 		size_t get_dimension();
 		bool get_value();
 		float get_feature(std::size_t position);
+		const float* get_features();
 		float operator[](std::size_t position);
 		
 };

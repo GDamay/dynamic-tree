@@ -29,14 +29,19 @@ std::string Tree::to_string()
 void Tree::add_point(const float* features, bool value)
 {
 	Point* new_point = new Point(this->dimension, features, value);
-	this->list_of_points.insert(new_point);
-	this->root->add_point(new_point);
+	this->add_point(new_point);
 }
 
 void Tree::add_point(Point* to_add)
 {
 	this->list_of_points.insert(to_add);
 	this->root->add_point(to_add);
+}
+
+void Tree::add_point(Point to_add)
+{
+	Point* ptr_to_add = new Point(to_add);
+	this->add_point(ptr_to_add);
 }
 
 void Tree::delete_point(const float* features, bool value)
@@ -48,6 +53,11 @@ void Tree::delete_point(const float* features, bool value)
 	this->root->delete_point(*it_to_delete);
 	delete *it_to_delete;
 	this->list_of_points.erase(it_to_delete);
+}
+
+void Tree::delete_point(Point to_delete)
+{
+	this->delete_point(to_delete.get_features(), to_delete.get_value());
 }
 		
 bool Tree::decision(const float* features)
