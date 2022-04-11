@@ -8,7 +8,9 @@ Vertex::Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, 
 	remaining_high(remaining_high),
 	epsilon(epsilon),
 	parent(parent),
-	pointset(pointset)
+	pointset(pointset),
+	under_child(NULL),
+	over_child(NULL)
 {
 	this->build();
 }
