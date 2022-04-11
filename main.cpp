@@ -2,6 +2,7 @@
 #include <fstream>
 #include <set>
 #include <vector>
+#include <chrono>
 #include "Models/PointSet/Point.h"
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
@@ -128,6 +129,8 @@ int main(int argc, char *argv[])
     if(argc>=6)
         delimiter=argv[5][0];
     std::vector<Point*> add_points; std::vector<Point> del_points;
+
+    const auto t1 = std::chrono::high_resolution_clock::now();
     Tree tree_from_file = from_file(file_name,
                 dimension,
                 delimiter,
@@ -137,6 +140,8 @@ int main(int argc, char *argv[])
                 add_points, del_points);
 
      std::cout << tree_from_file.to_string();
-
+    const auto t2 = std::chrono::high_resolution_clock::now();
+    const std::chrono::duration<double, std::milli> ms = t2 - t1;
+    std::cout << "Execution time (ms) : " << ms.count() <<std::endl;
     return 0;
 }

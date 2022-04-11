@@ -128,12 +128,12 @@ std::vector<std::string> Vertex::to_string()
 {
 	if(this->is_leaf)
 	{
-		std::vector<std::string> to_return{"p=" + std::to_string(this->pointset->get_positive_proportion())+ "\n"};
+		std::vector<std::string> to_return{"p=" + std::to_string(this->pointset->get_positive_proportion())+ ";s=" + std::to_string(this->pointset->get_size())+ "\n"};
 		return to_return;
 	}
 	else
 	{
-		std::string basis = "f=" + std::to_string(this->split_parameter) + ";t=" + std::to_string(this->split_threshold);
+		std::string basis = "f=" + std::to_string(this->split_parameter) + ";t=" + std::to_string(this->split_threshold) + ";p=" + std::to_string(this->pointset->get_positive_proportion())+ ";s=" + std::to_string(this->pointset->get_size());
 		std::vector<std::string> to_return = this->over_child->to_string();
 		std::string it_over_str = std::string(basis.length()-1, ' ') + "|  " ;
 		auto it_over = to_return.begin();
