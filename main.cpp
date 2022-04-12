@@ -4,10 +4,12 @@
 #include <set>
 #include <vector>
 #include <chrono>
+#include <queue>
 #include "Models/PointSet/Point.h"
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
 #include "Models/Tree/Tree.h"
+
 constexpr auto DIMENSION = 3;
 constexpr float EPSILON = (float)0.2;
 constexpr auto MAX_HEIGHT = 5;
@@ -53,6 +55,53 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 		}
 	}
 	return result;
+}
+
+Tree window_from_file(std::string file_name,
+                size_t dimension,
+                char delimiter,
+                size_t label_position,
+                float label_true_value,
+                unsigned int window_size, double eval_proba,
+				unsigned int seed,
+                std::vector<tree_event> &event_vector,
+				bool skip_first_line)
+{
+    std::multiset<Point*> tree_points;
+	std::queue<Point> points_to_delete;
+	srand(seed);
+    std::fstream data_file(file_name);
+    std::string current_line;
+    if (data_file.is_open()) {
+		if(skip_first_line)
+            getline(data_file, current_line);
+        for(size_t i = 0; getline(data_file, current_line); i++)
+        {
+			points_to_delete.push(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value));
+            if(i < window_size)
+			{
+                Point* new_point = new Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value);
+                tree_points.insert(new_point);
+			}
+			else
+			{
+				if(((double) rand() / (RAND_MAX)) < eval_proba)
+				{
+					tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::EVAL);
+					event_vector.push_back(new_event);
+				}
+				tree_event del_event(points_to_delete.front(), event_type::DEL);
+				event_vector.push_back(del_event);		
+				points_to_delete.pop();
+				tree_event add_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::ADD);
+				event_vector.push_back(add_event);				
+			}
+        }
+    }
+    else
+        throw "Error when oppening the data file";
+    data_file.close();
+    return Tree(tree_points, dimension, MAX_HEIGHT, EPSILON);
 }
 
 Tree from_file(std::string file_name,
@@ -207,13 +256,24 @@ int main(int argc, char *argv[])
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
-    Tree tree_from_file = from_file(file_name,
+    /*Tree tree_from_file = from_file(file_name,
                 dimension,
                 delimiter,
                 label_position,
                 label_true_value,
-                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line);
+                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line);
+*/
 
+	Tree tree_from_file = window_from_file(file_name,
+                dimension,
+                delimiter,
+                label_position,
+                label_true_value,
+				3000,
+				0.01,
+				(unsigned int)time(0),
+				event_vector,
+				skip_first_line);
     const auto t2 = std::chrono::high_resolution_clock::now();
 
      std::cout << tree_from_file.to_string();
