@@ -74,7 +74,8 @@ unsigned int Vertex::add_point(Point* new_point)
 					return threshold;
 			else
 			{
-				to_update->build();
+				if(threshold > 0)
+					to_update->build();
 				return 0;
 			}
 		}
@@ -108,7 +109,8 @@ unsigned int Vertex::delete_point(Point* old_point)
 					return threshold;
 			else
 			{
-				to_update->build();
+				if(threshold > 0)
+					to_update->build();
 				return 0;
 			}
 		}
