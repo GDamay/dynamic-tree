@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <iostream>
 
 struct param_setting {
 	bool is_mandatory;
@@ -45,6 +46,7 @@ std::map<std::string, std::string> parse_param(std::vector<param_setting> settin
 	for(auto it = settings.begin(); it != settings.end(); it++)
 	{
 		if(!are_still_positional && (*it).is_positional)
+			std::cerr << "Error : all positional arguments should be at the beginning of the setting" << std::endl;
 			throw "Error : all positional arguments should be at the beginning of the setting";
 		are_still_positional = (*it).is_positional;
 		if(are_still_positional)
@@ -57,6 +59,7 @@ std::map<std::string, std::string> parse_param(std::vector<param_setting> settin
 			else if(!(*it).is_mandatory)
 				parsed_params[(*it).return_name] = (*it).default_value;
 			else
+				std::cerr << "Error: Missing required positional parameter" << std::endl;
 				throw "Error: Missing required positional parameter";
 		}
 		else
@@ -73,6 +76,7 @@ std::map<std::string, std::string> parse_param(std::vector<param_setting> settin
 			else if(!(*it).is_mandatory)
 				parsed_params[(*it).return_name] = (*it).default_value;
 			else
+				std::cerr << "Error: Missing required non-positional parameter" << std::endl;
 				throw "Error: Missing required non-positional parameter";
 		}
 	}
