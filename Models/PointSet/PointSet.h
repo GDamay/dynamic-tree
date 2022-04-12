@@ -25,7 +25,7 @@ class PointSet {
 		int best_over_positive_counter;
 
 		// Proxy lineraly dependant on real gain
-		float best_gain;
+		double best_gain;
 
 		size_t best_parameter;
 		float best_threshold;
@@ -44,7 +44,7 @@ class PointSet {
 		float get_gini();
 
 		// Provides true best gain, not proxy
-		float get_best_gain();
+		double get_best_gain();
 		size_t get_best_index();
 		float get_best_threshold();
 

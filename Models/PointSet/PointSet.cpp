@@ -161,7 +161,7 @@ size_t PointSet::get_best_index()
 	return this->best_parameter;
 }
 
-float PointSet::get_best_gain()
+double PointSet::get_best_gain()
 {
 	this->calculate_best_gain();
 	return this->gini + (float)2/(float)this->points.size()*this->best_gain;

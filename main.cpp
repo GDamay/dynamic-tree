@@ -13,7 +13,7 @@ constexpr float EPSILON = (float)0.2;
 constexpr auto MAX_HEIGHT = 5;
 using namespace std;
 
-enum event_type{ADD, DEL, EVAL};
+enum class event_type{ADD, DEL, EVAL};
 struct tree_event{
 		Point  event_point;
 		event_type tree_event_type;
@@ -33,9 +33,9 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 	test_result result;
 	for(auto it = event_vector.begin(); it != event_vector.end(); it++)
 	{
-		if((*it).tree_event_type == ADD)
+		if((*it).tree_event_type == event_type::ADD)
 			tree_to_update.add_point((*it).event_point);
-		else if((*it).tree_event_type == DEL)
+		else if((*it).tree_event_type == event_type::DEL)
 			tree_to_update.delete_point((*it).event_point);
 		else
 		{
@@ -58,7 +58,7 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 Tree from_file(std::string file_name,
                 size_t dimension,
                 char delimiter,
-                unsigned int label_position,
+                size_t label_position,
                 float label_true_value,
                 std::vector<size_t> add_indices, std::vector<size_t> del_indices, std::vector<size_t> eval_indices,
                 std::vector<tree_event> &event_vector,
@@ -80,24 +80,24 @@ Tree from_file(std::string file_name,
             size_t val_it_eval = it_eval == eval_indices.end() ? UINTMAX_MAX : *it_eval;
             if(i == val_it_del || (i != val_it_add && i != val_it_eval))
 			{
-                Point* new_point = new Point(current_line, dimension, delimiter, label_position, label_true_value);
+                Point* new_point = new Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value);
                 tree_points.insert(new_point);
 			}
 			if(i == val_it_del)
 			{
-				tree_event new_event(Point(current_line, dimension, delimiter, label_position, label_true_value), DEL);
+				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::DEL);
 				event_vector.push_back(new_event);
 				it_del++;
 			}
 			if(i == val_it_eval)
 			{
-				tree_event new_event(Point(current_line, dimension, delimiter, label_position, label_true_value), EVAL);
+				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::EVAL);
 				event_vector.push_back(new_event);
 				it_eval++;
 			}
             if(i == val_it_add)
             {
-				tree_event new_event(Point(current_line, dimension, delimiter, label_position, label_true_value), ADD);
+				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::ADD);
 				event_vector.push_back(new_event);
 				it_add++;
             }
