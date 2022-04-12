@@ -61,7 +61,8 @@ Tree from_file(std::string file_name,
                 unsigned int label_position,
                 float label_true_value,
                 std::vector<size_t> add_indices, std::vector<size_t> del_indices, std::vector<size_t> eval_indices,
-                std::vector<tree_event> &event_vector)
+                std::vector<tree_event> &event_vector,
+				bool skip_first_line)
 {
     std::multiset<Point*> tree_points;
     auto it_add = add_indices.begin();
@@ -70,6 +71,8 @@ Tree from_file(std::string file_name,
     std::ifstream data_file(file_name);
     std::string current_line;
     if (data_file.is_open()) {
+		if(skip_first_line)
+            data_file >> current_line;
         for(size_t i = 0;data_file; i++)
         {
             data_file >> current_line;
@@ -183,7 +186,14 @@ int main(int argc, char *argv[])
 			"-d",
 			"--delimiter",
 			"Character that separate data in the file",
-			";")
+			";"),
+		param_setting(false,
+			false,
+			"skip_first_line",
+			"-s",
+			"--skip",
+			"Boolean to now if first line of file contains headers ('true' or '1' will be computed as 'true', else 'false')",
+			"false")
 	};
 	std::map<std::string, std::string> parsed_params = parse_param(settings, argc, argv);
 	std::string file_name = parsed_params["file_name"];
@@ -191,6 +201,7 @@ int main(int argc, char *argv[])
 	size_t label_position = (size_t)std::stoul(parsed_params["label_position"]);
 	float label_true_value = std::stof(parsed_params["label_true_value"]);
 	char delimiter = parsed_params["label_true_value"][0];
+	bool skip_first_line = parsed_params["skip_first_line"] == "true" ||parsed_params["skip_first_line"] == "1";
 
     std::vector<tree_event> event_vector;
 
@@ -200,7 +211,7 @@ int main(int argc, char *argv[])
                 delimiter,
                 label_position,
                 label_true_value,
-                std::vector<size_t> {1001, 1002, 1003, 1004, 1005}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {1005, 1010, 1011, 1012, 1253}, event_vector);
+                std::vector<size_t> {1001, 1002, 1003, 1004, 1005}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {1005, 1010, 1011, 1012, 1253}, event_vector, skip_first_line);
 
      std::cout << tree_from_file.to_string();
 
