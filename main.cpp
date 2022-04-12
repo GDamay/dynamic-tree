@@ -1,3 +1,4 @@
+#include "param_parser.h"
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -147,39 +148,50 @@ int main(int argc, char *argv[])
     test_splited[1] = NULL;
     Point bla("1;2;3;4", 3, ';', 0, 1);*/
 
-    std::string file_name;
-    size_t dimension;
-    char delimiter = ';';
-    unsigned int label_position = 0;
-    float label_true_value = 1.0;
-    char* end;
-    // If the file_name is not provided as argument, the user is asked to provide one
-    if(argc>=2)
-		if(argv[1] == "--help")
-		{
-			std::cout << "usage : ./dynamic_tree.exe <file_name> <dimension> <label_position> <label_true_value> <delimiter>" << std::endl;
-			return 0;
-		}
-		else
-			file_name=argv[1];
-    else
-    {
-        std::cout << "File name : ";
-        std::cin >> file_name;
-    }
-    if(argc>=3)
-        dimension=(size_t)std::strtol(argv[2], &end, 10);
-    else
-    {
-        std::cout << "Dimension : ";
-        std::cin >> dimension;
-    }
-    if(argc>=4)
-        label_position=(unsigned int)std::strtol(argv[3], &end, 10);
-    if(argc>=5)
-        label_true_value=std::strtof(argv[4], &end);
-    if(argc>=6)
-        delimiter=argv[5][0];
+	std::vector<param_setting> settings {
+		param_setting(true,
+			true,
+			"file_name",
+			"",
+			"",
+			"Name of the file containing data",
+			""),
+		param_setting(true,
+			true,
+			"dimension",
+			"",
+			"",
+			"Dimension of the features for each point (not counting the label)",
+			""),
+		param_setting(false,
+			false,
+			"label_position",
+			"-p",
+			"--label_position",
+			"Position of the label in the file (0 is the first data)",
+			"0"),
+		param_setting(false,
+			false,
+			"label_true_value",
+			"-v",
+			"--true_value",
+			"Value of the label that will be considered as true",
+			"1.0"),
+		param_setting(false,
+			false,
+			"delimiter",
+			"-d",
+			"--delimiter",
+			"Character that separate data in the file",
+			";")
+	};
+	std::map<std::string, std::string> parsed_params = parse_param(settings, argc, argv);
+	std::string file_name = parsed_params["file_name"];
+	size_t dimension = (size_t)std::stoul(parsed_params["dimension"]);
+	size_t label_position = (size_t)std::stoul(parsed_params["label_position"]);
+	float label_true_value = std::stof(parsed_params["label_true_value"]);
+	char delimiter = parsed_params["label_true_value"][0];
+
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
