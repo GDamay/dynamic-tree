@@ -68,17 +68,16 @@ Tree from_file(std::string file_name,
     auto it_add = add_indices.begin();
     auto it_del = del_indices.begin();
     auto it_eval = eval_indices.begin();
-    std::ifstream data_file(file_name);
+    std::fstream data_file(file_name);
     std::string current_line;
     if (data_file.is_open()) {
 		if(skip_first_line)
-            data_file >> current_line;
-        for(size_t i = 0;data_file; i++)
+            getline(data_file, current_line);
+        for(size_t i = 0; getline(data_file, current_line); i++)
         {
-            data_file >> current_line;
             size_t val_it_add = it_add == add_indices.end() ? UINTMAX_MAX : *it_add;
             size_t val_it_del = it_del == del_indices.end() ? UINTMAX_MAX : *it_del;
-            size_t val_it_eval = it_eval == del_indices.end() ? UINTMAX_MAX : *it_eval;
+            size_t val_it_eval = it_eval == eval_indices.end() ? UINTMAX_MAX : *it_eval;
             if(i == val_it_del || (i != val_it_add && i != val_it_eval))
 			{
                 Point* new_point = new Point(current_line, dimension, delimiter, label_position, label_true_value);
@@ -211,7 +210,7 @@ int main(int argc, char *argv[])
                 delimiter,
                 label_position,
                 label_true_value,
-                std::vector<size_t> {1001, 1002, 1003, 1004, 1005}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {1005, 1010, 1011, 1012, 1253}, event_vector, skip_first_line);
+                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line);
 
      std::cout << tree_from_file.to_string();
 
