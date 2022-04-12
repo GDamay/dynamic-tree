@@ -214,16 +214,22 @@ int main(int argc, char *argv[])
                 label_true_value,
                 std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {/*1004, 1005, 1006, 1007, 1008*/}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line);
 
+    const auto t2 = std::chrono::high_resolution_clock::now();
+
      std::cout << tree_from_file.to_string();
 
+    const auto t3 = std::chrono::high_resolution_clock::now();
      test_result result = test_iterations(event_vector, tree_from_file);
+    const auto t4 = std::chrono::high_resolution_clock::now();
+
      std::cout << "TP : " << result.true_positive << "; TN : " << result.true_negative << std::endl;
      std::cout << "FP : " << result.false_positive << "; FN : " << result.false_negative << std::endl;
 
      std::cout << tree_from_file.to_string();
 
-    const auto t2 = std::chrono::high_resolution_clock::now();
-    const std::chrono::duration<double, std::milli> ms = t2 - t1;
-    std::cout << "Execution time (ms) : " << ms.count() <<std::endl;
+    const std::chrono::duration<double, std::milli> init_time = t2 - t1;
+    const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
+    std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
+    std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
     return 0;
 }
