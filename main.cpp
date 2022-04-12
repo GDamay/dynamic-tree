@@ -191,10 +191,12 @@ int main(int argc, char *argv[])
 			"skip_first_line",
 			"-s",
 			"--skip",
-			"Boolean to now if first line of file contains headers ('true' or '1' will be computed as 'true', else 'false')",
+			"'true' or '1' if file has headers",
 			"false")
 	};
-	std::map<std::string, std::string> parsed_params = parse_param(settings, argc, argv);
+	std::map<std::string, std::string> parsed_params;
+	if(parse_param(settings, argc, argv, parsed_params))
+		return 0;
 	std::string file_name = parsed_params["file_name"];
 	size_t dimension = (size_t)std::stoul(parsed_params["dimension"]);
 	size_t label_position = (size_t)std::stoul(parsed_params["label_position"]);

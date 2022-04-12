@@ -1,8 +1,12 @@
 #ifndef PARAMPARSER_H_INCLUDED
 #define PARAMPARSER_H_INCLUDED
 
+#define SEPARATING_NAMES_MANDATORY 30
+#define SEPARATING_MANDATORY_DESC 12
+
 #include <vector>
 #include <map>
+#include <math.h>
 #include <string>
 #include <iostream>
 
@@ -38,9 +42,37 @@ size_t find(char *argv[], size_t begin, size_t size, std::string searched_obj)
 	return size;
 }
 
-std::map<std::string, std::string> parse_param(std::vector<param_setting> settings, int argc, char *argv[])
+// Return true if param "--help" was given, and therefore program has to return
+bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], std::map<std::string, std::string> &parsed_params)
 {
-	std::map<std::string, std::string> parsed_params;
+	size_t pos = find(argv, 0, argc, "--help");
+	if(pos < argc)
+	{
+		std::cout << "Usage: " << argv[0];
+		for(auto it = settings.begin(); it != settings.end() && (*it).is_positional; it++)
+			std::cout << " " << (*it).return_name;
+		std::cout << " " << "[OPTIONS]" << std::endl << std::endl;
+
+		std::cout << "Positional arguments:" <<std::endl;
+		auto it = settings.begin();
+		for(; it != settings.end() && (*it).is_positional; it++)
+			std::cout << "  " << (*it).return_name
+					<< std::string(std::max(1, (int)(SEPARATING_NAMES_MANDATORY - (*it).return_name.length())), ' ')
+					<< ((*it).is_mandatory
+							? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
+							: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
+					<< (*it).description << ((*it).default_value != "" ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
+		std::cout<<std::endl << "Options:" <<std::endl;
+		for(; it != settings.end(); it++)
+			std::cout << "  " << (*it).short_name << ", " << (*it).long_name
+					<< std::string(std::max(1, SEPARATING_NAMES_MANDATORY - (int)(*it).short_name.length() - (int)(*it).long_name.length() - (int)((std::string)", ").length()), ' ')
+					<< ((*it).is_mandatory
+							? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
+							: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
+					<< (*it).description << ((*it).default_value != "" ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
+		return true;
+
+	}
 	bool are_still_positional = true;
 	size_t i = 1;
 	for(auto it = settings.begin(); it != settings.end(); it++)
@@ -68,11 +100,11 @@ std::map<std::string, std::string> parse_param(std::vector<param_setting> settin
 		}
 		else
 		{
-			size_t pos = find(argv, i, argc, (*it).short_name);
+			pos = find(argv, i, argc, (*it).short_name);
 			pos++;
 			if (pos>=argc)
 			{
-				size_t pos = find(argv, i, argc, (*it).long_name);
+				pos = find(argv, i, argc, (*it).long_name);
 				pos++;
 			}
 			if(pos<argc)
@@ -86,6 +118,6 @@ std::map<std::string, std::string> parse_param(std::vector<param_setting> settin
 			}
 		}
 	}
-	return parsed_params;
+	return false;
 }
 #endif // PARAMPARSER_H_INCLUDED
