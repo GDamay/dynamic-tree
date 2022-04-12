@@ -21,10 +21,10 @@ struct tree_event{
 };
 
 struct test_result {
-	uint true_positive = 0;
-	uint true_negative = 0;
-	uint false_positive = 0;
-	uint false_negative = 0;
+	unsigned int true_positive = 0;
+	unsigned int true_negative = 0;
+	unsigned int false_positive = 0;
+	unsigned int false_negative = 0;
 };
 
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         std::cin >> dimension;
     }
     if(argc>=4)
-        label_position=(uint)std::strtol(argv[3], &end, 10);
+        label_position=(unsigned int)std::strtol(argv[3], &end, 10);
     if(argc>=5)
         label_true_value=std::strtof(argv[4], &end);
     if(argc>=6)
