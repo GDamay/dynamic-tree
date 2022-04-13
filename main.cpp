@@ -10,9 +10,9 @@
 #include "Models/Tree/Vertex.h"
 #include "Models/Tree/Tree.h"
 
-constexpr auto DIMENSION = 3;
-constexpr float EPSILON = (float)0.2;
-constexpr auto MAX_HEIGHT = 5;
+//constexpr auto DIMENSION = 3;
+//constexpr float EPSILON = (float)0.2;
+//constexpr auto MAX_HEIGHT = 5;
 using namespace std;
 
 enum class event_type{ADD, DEL, EVAL};
@@ -65,7 +65,9 @@ Tree window_from_file(std::string file_name,
                 unsigned int window_size, double eval_proba,
 				unsigned int seed,
                 std::vector<tree_event> &event_vector,
-				bool skip_first_line)
+				bool skip_first_line,
+				float epsilon,
+				unsigned int max_height)
 {
     std::multiset<Point*> tree_points;
 	std::queue<Point> points_to_delete;
@@ -101,7 +103,7 @@ Tree window_from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, MAX_HEIGHT, EPSILON);
+    return Tree(tree_points, dimension, max_height, epsilon);
 }
 
 Tree from_file(std::string file_name,
@@ -111,7 +113,9 @@ Tree from_file(std::string file_name,
                 float label_true_value,
                 std::vector<size_t> add_indices, std::vector<size_t> del_indices, std::vector<size_t> eval_indices,
                 std::vector<tree_event> &event_vector,
-				bool skip_first_line)
+				bool skip_first_line,
+				float epsilon,
+				unsigned int max_height)
 {
     std::multiset<Point*> tree_points;
     auto it_add = add_indices.begin();
@@ -155,7 +159,7 @@ Tree from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, MAX_HEIGHT, EPSILON);
+    return Tree(tree_points, dimension, max_height, epsilon);
 }
 
 int main(int argc, char *argv[])
@@ -241,7 +245,42 @@ int main(int argc, char *argv[])
 			"-s",
 			"--skip",
 			"'true' or '1' if file has headers",
-			"false")
+			"false"),
+		param_setting(false,
+			false,
+			"epsilon",
+			"-e",
+			"--epsilon",
+			"Epsilon of algorithm, determining when to rebuild node",
+			"0.2"),
+		param_setting(false,
+			false,
+			"window_size",
+			"-w",
+			"--window",
+			"Size of the window",
+			"3000"),
+		param_setting(false,
+			false,
+			"eval_proba",
+			"-a",
+			"--proba",
+			"Probability of a point after the window to be evaluation point",
+			"0.01"),
+		param_setting(false,
+			false,
+			"seed",
+			"-r",
+			"--seed",
+			"Seed for choosing evaluation points (if -1 : random)",
+			"-1"),
+		param_setting(false,
+			false,
+			"max_height",
+			"-h",
+			"--max_height",
+			"Max number of vertices between root and leaf (included)",
+			"5"),
 	};
 	std::map<std::string, std::string> parsed_params;
 	if(parse_param(settings, argc, argv, parsed_params))
@@ -252,6 +291,11 @@ int main(int argc, char *argv[])
 	float label_true_value = std::stof(parsed_params["label_true_value"]);
 	char delimiter = parsed_params["label_true_value"][0];
 	bool skip_first_line = parsed_params["skip_first_line"] == "true" ||parsed_params["skip_first_line"] == "1";
+	float epsilon = std::stof(parsed_params["epsilon"]);
+	unsigned int window_size = (unsigned int)std::stoul(parsed_params["window_size"]);
+	float eval_proba = std::stof(parsed_params["eval_proba"]);
+	unsigned int seed = parsed_params["seed"] == "-1" ? time(0) : (unsigned int)std::stoul(parsed_params["seed"]);
+	unsigned int max_height = (unsigned int)std::stoul(parsed_params["max_height"]);
 
     std::vector<tree_event> event_vector;
 
@@ -261,7 +305,7 @@ int main(int argc, char *argv[])
                 delimiter,
                 label_position,
                 label_true_value,
-                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line);
+                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line, epsilon, max_height);
 */
 
 	Tree tree_from_file = window_from_file(file_name,
@@ -269,11 +313,13 @@ int main(int argc, char *argv[])
                 delimiter,
                 label_position,
                 label_true_value,
-				3000,
-				0.01,
-				(unsigned int)time(0),
+				window_size,
+				eval_proba,
+				seed,
 				event_vector,
-				skip_first_line);
+				skip_first_line,
+				epsilon,
+				max_height);
     const auto t2 = std::chrono::high_resolution_clock::now();
 
      std::cout << tree_from_file.to_string();
