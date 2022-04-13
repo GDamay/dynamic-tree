@@ -337,5 +337,6 @@ int main(int argc, char *argv[])
     const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
     std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
     std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
+    std::cout << "Nb builds : " << Vertex::nb_build << std::endl;
     return 0;
 }

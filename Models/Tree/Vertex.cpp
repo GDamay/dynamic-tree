@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+unsigned int Vertex::nb_build = 0;
 
 Vertex::Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, float epsilon, bool is_root) :
 	is_root(is_root),
@@ -27,6 +28,7 @@ Vertex::~Vertex()
 
 void Vertex::build()
 {
+	Vertex::nb_build++;
 	if(!this->under_child)
 	{
 		delete this->under_child;
@@ -86,33 +88,30 @@ unsigned int Vertex::add_point(Point* new_point)
 unsigned int Vertex::delete_point(Point* old_point)
 {
 	this->pointset->delete_point(old_point);
-	if(!this->is_leaf)
+	this->updates_since_last_build++;
+	if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
 	{
-		this->updates_since_last_build++;
-		if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
-		{
+		if(this->is_root)
+			this->build();
+
+		// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
+		// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
+		return (unsigned int)(pow(1.0+epsilon, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
+	}
+	else if(!this->is_leaf)
+	{
+		Vertex* to_update = (*old_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+		unsigned int threshold = to_update->delete_point(old_point);
+		if(threshold > 0 && this->pointset->get_size() < threshold)
 			if(this->is_root)
 				this->build();
-
-			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
-			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-			return (unsigned int)(pow(1.0+epsilon, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon))) + 0.5);
-		}
+			else
+				return threshold;
 		else
 		{
-			Vertex* to_update = (*old_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
-			unsigned int threshold = to_update->delete_point(old_point);
-			if(threshold > 0 && this->pointset->get_size() < threshold)
-				if(this->is_root)
-					this->build();
-				else
-					return threshold;
-			else
-			{
-				if(threshold > 0)
-					to_update->build();
-				return 0;
-			}
+			if(threshold > 0)
+				to_update->build();
+			return 0;
 		}
 	}
 	return 0;

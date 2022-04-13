@@ -6,6 +6,8 @@
 #include "../PointSet/Point.h"
 #include <vector>
 
+extern unsigned int nb_build;
+
 class Vertex {
 	private:
 		bool is_leaf;
@@ -39,5 +41,7 @@ class Vertex {
 		
 		//Does not take ownership
 		bool decision(const float* features);
+
+		static unsigned int nb_build;
 };
 #endif // VERTEX_H_INCLUDED
