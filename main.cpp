@@ -5,6 +5,8 @@
 #include <vector>
 #include <chrono>
 #include <queue>
+#include <random>
+#include <algorithm>
 #include "Models/PointSet/Point.h"
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
@@ -14,6 +16,8 @@
 //constexpr float EPSILON = (float)0.2;
 //constexpr auto MAX_HEIGHT = 5;
 using namespace std;
+
+enum class algo_type{SLIDING, RANDOM};
 
 enum class event_type{ADD, DEL, EVAL};
 struct tree_event{
@@ -57,6 +61,77 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 	return result;
 }
 
+Tree random_from_file(std::string file_name,
+				size_t dimension,
+				char delimiter,
+				size_t label_position,
+				float label_true_value,
+				unsigned int initial_size, double eval_proba,
+				unsigned int number_of_updates, double insert_probability,
+				unsigned int seed,
+                std::vector<tree_event> &event_vector,
+				bool skip_first_line,
+				float epsilon,
+				unsigned int max_height)
+{
+	// --- Reading file ---
+	std::vector<Point> points_in_file;
+    std::fstream data_file(file_name);
+    std::string current_line;
+    if (data_file.is_open()) {
+		if(skip_first_line)
+            getline(data_file, current_line);
+        for(size_t i = 0; getline(data_file, current_line); i++)
+			points_in_file.push_back(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value));
+
+    }
+    else
+        throw "Error when oppening the data file";
+    data_file.close();
+
+	// --- Building events ---
+	srand(seed);
+    std::multiset<Point*> tree_points;
+	std::multiset<Point> already_added_points;
+    std::shuffle(points_in_file.begin(), points_in_file.end(), std::default_random_engine(seed));
+    auto point_to_treat = points_in_file.begin();
+	for(unsigned int i = 0; i < initial_size && point_to_treat != points_in_file.end(); i++, point_to_treat++)
+	{
+		Point* new_tree_point = new Point(*point_to_treat);
+		tree_points.insert(new_tree_point);
+
+		already_added_points.insert(Point(*point_to_treat));
+	}
+	if(point_to_treat != points_in_file.end())
+		point_to_treat++;
+	for(unsigned int i = 0; i < number_of_updates && point_to_treat != points_in_file.end(); i++, point_to_treat++)
+	{
+		if((double)rand()/(RAND_MAX) < eval_proba)
+		{
+			tree_event new_event(*point_to_treat, event_type::EVAL);
+			event_vector.push_back(new_event);
+		}
+		if(already_added_points.size() == 0 || (double)rand()/(RAND_MAX) < insert_probability)
+		{
+			tree_event new_event(*point_to_treat, event_type::ADD);
+			event_vector.push_back(new_event);
+
+			already_added_points.insert(Point(*point_to_treat));
+		}
+		else
+		{
+			unsigned int rand_val = (unsigned int)(double)rand() / (RAND_MAX)*(already_added_points.size());
+			auto to_del = already_added_points.begin();
+			std::advance(to_del, rand_val);
+			tree_event new_event(*to_del, event_type::DEL);
+			event_vector.push_back(new_event);
+
+			already_added_points.erase(to_del);
+		}
+	}
+    return Tree(tree_points, dimension, max_height, epsilon);
+}
+
 Tree window_from_file(std::string file_name,
                 size_t dimension,
                 char delimiter,
@@ -93,10 +168,10 @@ Tree window_from_file(std::string file_name,
 					event_vector.push_back(new_event);
 				}
 				tree_event del_event(points_to_delete.front(), event_type::DEL);
-				event_vector.push_back(del_event);		
+				event_vector.push_back(del_event);
 				points_to_delete.pop();
 				tree_event add_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::ADD);
-				event_vector.push_back(add_event);				
+				event_vector.push_back(add_event);
 			}
         }
     }
@@ -104,6 +179,51 @@ Tree window_from_file(std::string file_name,
         throw "Error when oppening the data file";
     data_file.close();
     return Tree(tree_points, dimension, max_height, epsilon);
+}
+
+// Needed for not having to make generic constructor for Tree
+Tree branched_from_file(std::string file_name,
+	size_t dimension,
+	char delimiter,
+	size_t label_position,
+	float label_true_value,
+	unsigned int dataset_size, double eval_proba,
+	unsigned int number_of_updates, double insert_probability,
+	unsigned int seed,
+	std::vector<tree_event>& event_vector,
+	bool skip_first_line,
+	float epsilon,
+	unsigned int max_height,
+	algo_type type_of_building)
+{
+	if (type_of_building == algo_type::SLIDING)
+		return window_from_file(file_name,
+			dimension,
+			delimiter,
+			label_position,
+			label_true_value,
+			dataset_size,
+			eval_proba,
+			seed,
+			event_vector,
+			skip_first_line,
+			epsilon,
+			max_height);
+	else
+		return random_from_file(file_name,
+			dimension,
+			delimiter,
+			label_position,
+			label_true_value,
+			dataset_size,
+			eval_proba,
+			number_of_updates,
+			insert_probability,
+			seed,
+			event_vector,
+			skip_first_line,
+			epsilon,
+			max_height);
 }
 
 Tree from_file(std::string file_name,
@@ -255,10 +375,10 @@ int main(int argc, char *argv[])
 			"0.2"),
 		param_setting(false,
 			false,
-			"window_size",
-			"-w",
-			"--window",
-			"Size of the window",
+			"dataset_size",
+			"-b",
+			"--dataset_size",
+			"Size of the window in SLIDING test or of the initial dataset in RANDOM mode",
 			"3000"),
 		param_setting(false,
 			false,
@@ -281,6 +401,27 @@ int main(int argc, char *argv[])
 			"--max_height",
 			"Max number of vertices between root and leaf (included)",
 			"5"),
+		param_setting(false,
+			false,
+			"test_type",
+			"-t",
+			"--type",
+			"Type of test to make, between 'S' or 'SLIDING' for sliding window, and 'R' or 'RANDOM' for random unordered sampling",
+			"S"),
+		param_setting(false,
+			false,
+			"nb_updates",
+			"-u",
+			"--nb_updates",
+			"Number of updates (add and del) to include in RANDOM test",
+			"1000"),
+		param_setting(false,
+			false,
+			"insert_proba",
+			"-i",
+			"--insert_proba",
+			"Probability of each event in RANDOM test to be an insertion",
+			"0.5")
 	};
 	std::map<std::string, std::string> parsed_params;
 	if(parse_param(settings, argc, argv, parsed_params))
@@ -292,10 +433,19 @@ int main(int argc, char *argv[])
 	char delimiter = parsed_params["label_true_value"][0];
 	bool skip_first_line = parsed_params["skip_first_line"] == "true" ||parsed_params["skip_first_line"] == "1";
 	float epsilon = std::stof(parsed_params["epsilon"]);
-	unsigned int window_size = (unsigned int)std::stoul(parsed_params["window_size"]);
+	unsigned int dataset_size = (unsigned int)std::stoul(parsed_params["dataset_size"]);
 	float eval_proba = std::stof(parsed_params["eval_proba"]);
 	unsigned int seed = parsed_params["seed"] == "-1" ? time(0) : (unsigned int)std::stoul(parsed_params["seed"]);
 	unsigned int max_height = (unsigned int)std::stoul(parsed_params["max_height"]);
+	algo_type current_algo_type;
+	if(parsed_params["test_type"] == "S" || parsed_params["test_type"] == "SLIDING")
+			current_algo_type = algo_type::SLIDING;
+	else if(parsed_params["test_type"] == "R" || parsed_params["test_type"] == "RANDOM")
+			current_algo_type = algo_type::RANDOM;
+	else
+			throw "Unknown algo type : " + parsed_params["test_type"];
+	unsigned int nb_updates = (unsigned int)std::stoul(parsed_params["nb_updates"]);
+	float insert_proba = std::stof(parsed_params["insert_proba"]);
 
     std::vector<tree_event> event_vector;
 
@@ -308,18 +458,22 @@ int main(int argc, char *argv[])
                 std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line, epsilon, max_height);
 */
 
-	Tree tree_from_file = window_from_file(file_name,
+	Tree tree_from_file = branched_from_file(file_name,
                 dimension,
                 delimiter,
                 label_position,
                 label_true_value,
-				window_size,
+				dataset_size,
 				eval_proba,
+				nb_updates,
+				insert_proba,
 				seed,
 				event_vector,
 				skip_first_line,
 				epsilon,
-				max_height);
+				max_height,
+				current_algo_type);
+
     const auto t2 = std::chrono::high_resolution_clock::now();
 
      std::cout << tree_from_file.to_string();
