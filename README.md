@@ -6,6 +6,7 @@ This algorithm presents a structure for dynamic decision trees that minimise the
 
 ## Repository overview
 
+```
 ├── README.md
 ├── .gitignore
 ├── CMakeLists.txt -- Configures cmake
@@ -25,6 +26,7 @@ This algorithm presents a structure for dynamic decision trees that minimise the
 	    ├── Tree.cpp
 	    ├── Vertex.h       -- Class representing a vertex of a dynamic decision tree
 	    └── Vertex.cpp
+```
 
 ## Running instructions
 
