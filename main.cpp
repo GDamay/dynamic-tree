@@ -364,8 +364,9 @@ int main(int argc, char *argv[])
 			"skip_first_line",
 			"-s",
 			"--skip",
-			"'true' or '1' if file has headers",
-			"false"),
+			"Indicates that file has a header line",
+			"",
+			true),
 		param_setting(false,
 			false,
 			"epsilon",
@@ -421,7 +422,15 @@ int main(int argc, char *argv[])
 			"-i",
 			"--insert_proba",
 			"Probability of each event in RANDOM test to be an insertion",
-			"0.5")
+			"0.5"),
+		param_setting(false,
+			false,
+			"is_output_csv",
+			"-c",
+			"--csv",
+			"Indicates that the ouput should be formatted as CSV",
+			"",
+			true)
 	};
 	std::map<std::string, std::string> parsed_params;
 	if(parse_param(settings, argc, argv, parsed_params))
@@ -431,7 +440,7 @@ int main(int argc, char *argv[])
 	size_t label_position = (size_t)std::stoul(parsed_params["label_position"]);
 	float label_true_value = std::stof(parsed_params["label_true_value"]);
 	char delimiter = parsed_params["label_true_value"][0];
-	bool skip_first_line = parsed_params["skip_first_line"] == "true" ||parsed_params["skip_first_line"] == "1";
+	bool skip_first_line = parsed_params["skip_first_line"] == BOOLEAN_TRUE_VALUE;
 	float epsilon = std::stof(parsed_params["epsilon"]);
 	unsigned int dataset_size = (unsigned int)std::stoul(parsed_params["dataset_size"]);
 	float eval_proba = std::stof(parsed_params["eval_proba"]);
@@ -446,7 +455,7 @@ int main(int argc, char *argv[])
 			throw "Unknown algo type : " + parsed_params["test_type"];
 	unsigned int nb_updates = (unsigned int)std::stoul(parsed_params["nb_updates"]);
 	float insert_proba = std::stof(parsed_params["insert_proba"]);
-
+	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
@@ -476,21 +485,32 @@ int main(int argc, char *argv[])
 
     const auto t2 = std::chrono::high_resolution_clock::now();
 
-     std::cout << tree_from_file.to_string();
+	if(!is_output_csv)
+		std::cout << tree_from_file.to_string();
 
     const auto t3 = std::chrono::high_resolution_clock::now();
      test_result result = test_iterations(event_vector, tree_from_file);
     const auto t4 = std::chrono::high_resolution_clock::now();
 
-     std::cout << "TP : " << result.true_positive << "; TN : " << result.true_negative << std::endl;
-     std::cout << "FP : " << result.false_positive << "; FN : " << result.false_negative << std::endl;
+	if(is_output_csv)
+		std::cout << epsilon << ";" << result.true_positive << ";" << result.true_negative << ";" << result.false_positive << ";" << result.false_negative;
+	else
+	{
+		std::cout << "TP : " << result.true_positive << "; TN : " << result.true_negative << std::endl;
+		std::cout << "FP : " << result.false_positive << "; FN : " << result.false_negative << std::endl;
 
-     std::cout << tree_from_file.to_string();
+		std::cout << tree_from_file.to_string();
+	}
 
     const std::chrono::duration<double, std::milli> init_time = t2 - t1;
     const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
-    std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
-    std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
-    std::cout << "Nb builds : " << Vertex::nb_build << std::endl;
+    if(is_output_csv)
+		std::cout << ";" << init_time.count() << ";" << iter_time.count() << Vertex::nb_build << std::endl;
+	else
+	{
+		std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
+		std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
+		std::cout << "Nb builds : " << Vertex::nb_build << std::endl;
+	}
     return 0;
 }

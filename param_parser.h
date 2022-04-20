@@ -4,6 +4,9 @@
 #define SEPARATING_NAMES_MANDATORY 30
 #define SEPARATING_MANDATORY_DESC 12
 
+#define BOOLEAN_TRUE_VALUE "1"
+#define BOOLEAN_FALSE_VALUE "0"
+
 #include <vector>
 #include <map>
 #include <math.h>
@@ -18,20 +21,23 @@ struct param_setting {
 	std::string long_name;
 	std::string description;
 	std::string default_value;
+	bool is_boolean; // If true, the parameter has just to be present to set value True (default is then automatically "false")
 	param_setting(bool is_mandatory,
 					bool is_positional,
 					std::string return_name,
 					std::string short_name,
 					std::string long_name,
 					std::string description,
-					std::string default_value):
+					std::string default_value = "",
+					bool is_boolean = false):
 		is_mandatory(is_mandatory),
 		is_positional(is_positional),
 		return_name(return_name),
 		short_name(short_name),
 		long_name(long_name),
 		description(description),
-		default_value(default_value) {};
+		default_value(default_value),
+		is_boolean(is_boolean) {};
 };
 
 size_t find(char *argv[], size_t begin, size_t size, std::string searched_obj)
@@ -69,7 +75,7 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 					<< ((*it).is_mandatory
 							? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
 							: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
-					<< (*it).description << ((*it).default_value != "" ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
+					<< (*it).description << ((*it).default_value != "" && !(*it).is_boolean ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
 		return true;
 
 	}
@@ -101,14 +107,22 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 		else
 		{
 			pos = find(argv, i, argc, (*it).short_name);
-			pos++;
 			if (pos>=argc)
 			{
 				pos = find(argv, i, argc, (*it).long_name);
-				pos++;
 			}
 			if(pos<argc)
-				parsed_params[(*it).return_name] = argv[pos];
+			{
+				if((*it).is_boolean)
+					parsed_params[(*it).return_name] = BOOLEAN_TRUE_VALUE;
+				else
+				{
+					pos++;
+					parsed_params[(*it).return_name] = argv[pos];
+				}
+			}
+			else if((*it).is_boolean)
+				parsed_params[(*it).return_name] = BOOLEAN_FALSE_VALUE;
 			else if(!(*it).is_mandatory)
 				parsed_params[(*it).return_name] = (*it).default_value;
 			else
