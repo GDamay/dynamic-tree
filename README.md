@@ -39,4 +39,4 @@ cmake -S . -B Build
 cmake --build Build
 ```
 
-An executable will be created. On Windows using Visual Studio, it will be *Build/Debug/dynamic_tree.exe* . Run `[path_to_executable] --help` to get further instructions.
+An executable will be created. On Linux, it will be *Build/dynamic_tree*, on Windows using Visual Studio, it will be *Build/Debug/dynamic_tree.exe* . Run `[path_to_executable] --help` to get further instructions.
