@@ -505,7 +505,7 @@ int main(int argc, char *argv[])
     const std::chrono::duration<double, std::milli> init_time = t2 - t1;
     const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
     if(is_output_csv)
-		std::cout << ";" << init_time.count() << ";" << iter_time.count() << Vertex::nb_build << std::endl;
+		std::cout << ";" << init_time.count() << ";" << iter_time.count() << ";" << Vertex::nb_build << std::endl;
 	else
 	{
 		std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
