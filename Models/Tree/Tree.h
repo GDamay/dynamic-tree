@@ -17,9 +17,15 @@ class Tree {
 		size_t dimension;
 		size_t max_height;
 		float epsilon;
+		unsigned int min_split_points;
+		float min_split_gini;
+		float epsilon_transmission;
 	public:
 		//Takes ownership
-		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon);
+		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission);
+
+		//Used when making several successive tests for avoiding go through the entire initialisation process several time
+		Tree(const Tree& source, float epsilon, float epsilon_transmission);
 		~Tree();
 		
 		std::string to_string();

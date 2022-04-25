@@ -72,7 +72,10 @@ Tree random_from_file(std::string file_name,
                 std::vector<tree_event> &event_vector,
 				bool skip_first_line,
 				float epsilon,
-				unsigned int max_height)
+				unsigned int max_height,
+				unsigned int min_split_points,
+				float min_split_gini,
+				float epsilon_transmission)
 {
 	// --- Reading file ---
 	std::vector<Point> points_in_file;
@@ -129,7 +132,7 @@ Tree random_from_file(std::string file_name,
 			already_added_points.erase(to_del);
 		}
 	}
-    return Tree(tree_points, dimension, max_height, epsilon);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
 }
 
 Tree window_from_file(std::string file_name,
@@ -142,7 +145,10 @@ Tree window_from_file(std::string file_name,
                 std::vector<tree_event> &event_vector,
 				bool skip_first_line,
 				float epsilon,
-				unsigned int max_height)
+				unsigned int max_height,
+				unsigned int min_split_points,
+				float min_split_gini,
+				float epsilon_transmission)
 {
     std::multiset<Point*> tree_points;
 	std::queue<Point> points_to_delete;
@@ -178,7 +184,7 @@ Tree window_from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, max_height, epsilon);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
 }
 
 // Needed for not having to make generic constructor for Tree
@@ -194,7 +200,10 @@ Tree branched_from_file(std::string file_name,
 	bool skip_first_line,
 	float epsilon,
 	unsigned int max_height,
-	algo_type type_of_building)
+	algo_type type_of_building,
+	unsigned int min_split_points,
+	float min_split_gini,
+	float epsilon_transmission)
 {
 	if (type_of_building == algo_type::SLIDING)
 		return window_from_file(file_name,
@@ -208,7 +217,10 @@ Tree branched_from_file(std::string file_name,
 			event_vector,
 			skip_first_line,
 			epsilon,
-			max_height);
+			max_height,
+			min_split_points,
+			min_split_gini,
+			epsilon_transmission);
 	else
 		return random_from_file(file_name,
 			dimension,
@@ -223,7 +235,10 @@ Tree branched_from_file(std::string file_name,
 			event_vector,
 			skip_first_line,
 			epsilon,
-			max_height);
+			max_height,
+			min_split_points,
+			min_split_gini,
+			epsilon_transmission);
 }
 
 Tree from_file(std::string file_name,
@@ -235,7 +250,10 @@ Tree from_file(std::string file_name,
                 std::vector<tree_event> &event_vector,
 				bool skip_first_line,
 				float epsilon,
-				unsigned int max_height)
+				unsigned int max_height,
+				unsigned int min_split_points,
+				float min_split_gini,
+				float epsilon_transmission)
 {
     std::multiset<Point*> tree_points;
     auto it_add = add_indices.begin();
@@ -279,7 +297,7 @@ Tree from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, max_height, epsilon);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
 }
 
 int main(int argc, char *argv[])
@@ -430,7 +448,42 @@ int main(int argc, char *argv[])
 			"--csv",
 			"Indicates that the ouput should be formatted as CSV",
 			"",
-			true)
+			true),
+		param_setting(false,
+			false,
+			"min_split_points",
+			"-m",
+			"--min_split_points",
+			"Minimal number of points in a vertex to make it have children",
+			"0"),
+		param_setting(false,
+			false,
+			"min_split_gini",
+			"-g",
+			"--min_split_gini",
+			"Minimal gini value of the points set of a vertex to make it have children",
+			"0"),
+		param_setting(false,
+			false,
+			"epsilon_transmission",
+			"-w",
+			"--epsilon_transmission",
+			"Epsilon to apply when choosing which layer to recompute. If -1 : epsilon",
+			"-1"),
+		param_setting(false,
+			false,
+			"epsilon_max",
+			"-f",
+			"--epsilon_max",
+			"For making several tests, set this to the max epsilon to test. If -1 : epsilon",
+			"-1"),
+		param_setting(false,
+			false,
+			"epsilon_step",
+			"-j",
+			"--epsilon_step",
+			"For making several tests, set this to the step between epsilons to test",
+			"0.1")
 	};
 	std::map<std::string, std::string> parsed_params;
 	if(parse_param(settings, argc, argv, parsed_params))
@@ -456,6 +509,11 @@ int main(int argc, char *argv[])
 	unsigned int nb_updates = (unsigned int)std::stoul(parsed_params["nb_updates"]);
 	float insert_proba = std::stof(parsed_params["insert_proba"]);
 	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;
+	unsigned int min_split_points = (unsigned int)std::stoul(parsed_params["min_split_points"]);
+	float min_split_gini = std::stof(parsed_params["min_split_gini"]);
+	float epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_transmission"]);
+	float epsilon_max = parsed_params["epsilon_max"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_max"]);
+	float epsilon_step = std::stof(parsed_params["epsilon_step"]);
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
@@ -467,7 +525,7 @@ int main(int argc, char *argv[])
                 std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line, epsilon, max_height);
 */
 
-	Tree tree_from_file = branched_from_file(file_name,
+	Tree reference_tree = branched_from_file(file_name,
                 dimension,
                 delimiter,
                 label_position,
@@ -481,36 +539,44 @@ int main(int argc, char *argv[])
 				skip_first_line,
 				epsilon,
 				max_height,
-				current_algo_type);
+				current_algo_type,
+				min_split_points,
+				min_split_gini,
+				epsilon_transmission);
 
     const auto t2 = std::chrono::high_resolution_clock::now();
 
 	if(!is_output_csv)
-		std::cout << tree_from_file.to_string();
+		std::cout << reference_tree.to_string();
 
-    const auto t3 = std::chrono::high_resolution_clock::now();
-     test_result result = test_iterations(event_vector, tree_from_file);
-    const auto t4 = std::chrono::high_resolution_clock::now();
-
-	if(is_output_csv)
-		std::cout << epsilon << ";" << result.true_positive << ";" << result.true_negative << ";" << result.false_positive << ";" << result.false_negative;
-	else
+	for(float current_epsilon = epsilon; current_epsilon <= epsilon_max; current_epsilon += epsilon_step)
 	{
-		std::cout << "TP : " << result.true_positive << "; TN : " << result.true_negative << std::endl;
-		std::cout << "FP : " << result.false_positive << "; FN : " << result.false_negative << std::endl;
+		Tree current_tree(reference_tree, current_epsilon, epsilon_transmission);
+		Vertex::reset_nb_build();
+		const auto t3 = std::chrono::high_resolution_clock::now();
+		 test_result result = test_iterations(event_vector, current_tree);
+		const auto t4 = std::chrono::high_resolution_clock::now();
 
-		std::cout << tree_from_file.to_string();
-	}
+		if(is_output_csv)
+			std::cout << seed << ";" << current_epsilon << ";" << result.true_positive << ";" << result.true_negative << ";" << result.false_positive << ";" << result.false_negative;
+		else
+		{
+			std::cout << "TP : " << result.true_positive << "; TN : " << result.true_negative << std::endl;
+			std::cout << "FP : " << result.false_positive << "; FN : " << result.false_negative << std::endl;
 
-    const std::chrono::duration<double, std::milli> init_time = t2 - t1;
-    const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
-    if(is_output_csv)
-		std::cout << ";" << init_time.count() << ";" << iter_time.count() << ";" << Vertex::nb_build << std::endl;
-	else
-	{
-		std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
-		std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
-		std::cout << "Nb builds : " << Vertex::nb_build << std::endl;
+			std::cout << current_tree.to_string();
+		}
+
+		const std::chrono::duration<double, std::milli> init_time = t2 - t1;
+		const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
+		if(is_output_csv)
+			std::cout << ";" << init_time.count() << ";" << iter_time.count() << ";" << Vertex::get_nb_build() << std::endl;
+		else
+		{
+			std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
+			std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
+			std::cout << "Nb builds : " << Vertex::get_nb_build() << std::endl;
+		}
 	}
     return 0;
 }

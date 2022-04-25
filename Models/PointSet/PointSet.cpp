@@ -31,6 +31,24 @@ PointSet::PointSet(const PointSet& source) : points(source.points), dimension(so
 	}
 	
 }
+PointSet::PointSet(const PointSet& source, std::multiset<Point*> new_points):
+		points(new_points),
+		dimension(source.dimension),
+		positive_counter(source.positive_counter),
+		positive_proportion(source.positive_proportion),
+		is_positive_proportion_calculated(source.is_positive_proportion_calculated),
+		gini(source.gini),
+		is_gini_calculated(source.is_gini_calculated),
+		best_under_counter(source.best_under_counter),
+		best_under_positive_counter(source.best_under_positive_counter),
+		best_over_counter(source.best_over_counter),
+		best_over_positive_counter(source.best_over_positive_counter),
+		best_gain(source.best_gain),
+		best_parameter(source.best_parameter),
+		best_threshold(source.best_threshold),
+		is_gain_calculated(source.is_gain_calculated)
+{}
+
 PointSet& PointSet::operator=(const PointSet& source)
 {
 	this->is_positive_proportion_calculated = source.is_positive_proportion_calculated;
@@ -200,17 +218,8 @@ void PointSet::delete_point(Point* old_point)
 
 std::array<PointSet*, 2> PointSet::split_at_best()
 {
-	this->calculate_best_gain();
-	std::multiset<Point*> points_under;
-	std::multiset<Point*> points_over;
-	auto it_under = points_under.begin();
-	auto it_over = points_over.begin();
-	for(auto it = this->points.begin(); it != this->points.end(); it++)
-		if((*it)->get_feature(this->best_parameter) <= this->best_threshold)
-			it_under = points_under.insert(it_under, *it);
-		else
-			it_over = points_over.insert(it_over, *it);
-	std::array<PointSet*, 2> to_return = {new PointSet(points_under, this->dimension), new PointSet(points_over, this->dimension)};
+	auto points_multisets = this->split_at_best_multiset();
+	std::array<PointSet*, 2> to_return = {new PointSet(points_multisets[0], this->dimension), new PointSet(points_multisets[1], this->dimension)};
 	to_return[0]->positive_proportion = this->best_under_counter == 0 ? 0 :
 		(float)this->best_under_positive_counter/(float)this->best_under_counter;
 	to_return[0]->positive_counter = this->best_under_positive_counter;
@@ -220,5 +229,19 @@ std::array<PointSet*, 2> PointSet::split_at_best()
 	to_return[1]->positive_counter = this->best_over_positive_counter;
 	to_return[1]->is_positive_proportion_calculated = true;
 	
+	return to_return;
+}
+
+std::array<std::multiset<Point*>, 2> PointSet::split_at_best_multiset()
+{
+	std::array<std::multiset<Point*>, 2>  to_return;
+	this->calculate_best_gain();
+	auto it_under = to_return[0].begin();
+	auto it_over = to_return[1].begin();
+	for(auto it = this->points.begin(); it != this->points.end(); it++)
+		if((*it)->get_feature(this->best_parameter) <= this->best_threshold)
+			it_under = to_return[0].insert(it_under, *it);
+		else
+			it_over = to_return[1].insert(it_over, *it);
 	return to_return;
 }

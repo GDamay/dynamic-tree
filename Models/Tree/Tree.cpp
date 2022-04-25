@@ -2,14 +2,34 @@
 #include "../PointSet/PointSet.h"
 #include <numeric>
 
-Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon) :
+Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points, float min_split_gini, float epsilon_transmission) :
 	list_of_points(list_of_points.begin(), list_of_points.end()),
 	dimension(dimension),
 	max_height(max_height),
-	epsilon(epsilon)
+	epsilon(epsilon),
+	min_split_points(min_split_points),
+	min_split_gini(min_split_gini),
+	epsilon_transmission(epsilon_transmission)
 {
 	PointSet* first_set = new PointSet(list_of_points, dimension);
-	this->root = new Vertex(first_set, NULL, max_height-1, epsilon, true);
+	this->root = new Vertex(first_set, NULL, max_height-1, epsilon, min_split_points, min_split_gini, epsilon_transmission, true);
+}
+
+Tree::Tree(const Tree& source, float epsilon, float epsilon_transmission) :
+	list_of_points(),
+	dimension(source.dimension),
+	max_height(source.max_height),
+	epsilon(epsilon),
+	min_split_points(source.min_split_points),
+	min_split_gini(source.min_split_gini),
+	epsilon_transmission(source.epsilon_transmission)
+{
+	for(auto it = source.list_of_points.begin(); it != source.list_of_points.end(); it++)
+	{
+		Point* new_point = new Point(**it);
+		this->list_of_points.insert(new_point);
+	}
+	this->root = new Vertex(*source.root, epsilon, std::multiset<Point*>(this->list_of_points.begin(), this->list_of_points.end()));
 }
 
 Tree::~Tree()

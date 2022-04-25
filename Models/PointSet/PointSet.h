@@ -36,6 +36,7 @@ class PointSet {
 	public:
 		PointSet(std::multiset<Point*> points, size_t dimension);
 		PointSet(const PointSet& source);
+		PointSet(const PointSet& source, std::multiset<Point*> new_points);
 		PointSet& operator=(const PointSet& source);
 		~PointSet();
 
@@ -53,5 +54,6 @@ class PointSet {
 		
 		//Gives ownership
 		std::array<PointSet*, 2> split_at_best();
+		std::array<std::multiset<Point*>, 2> split_at_best_multiset();
 };
 #endif // POINTSET_H_INCLUDED
