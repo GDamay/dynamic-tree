@@ -84,3 +84,8 @@ bool Tree::decision(const float* features)
 {
 	return this->root->decision(features);
 }
+
+unsigned int Tree::get_training_error()
+{
+	return this->root->get_training_error();
+}

@@ -45,7 +45,8 @@ class Vertex {
 		unsigned int delete_point(Point* old_point);
 
 		std::vector<std::string> to_string();
-		
+
+		unsigned int get_training_error();
 		//Does not take ownership
 		bool decision(const float* features);
 		static unsigned int get_nb_build() {return Vertex::nb_build;};

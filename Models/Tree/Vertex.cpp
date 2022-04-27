@@ -201,3 +201,11 @@ std::vector<std::string> Vertex::to_string()
 		return to_return;
 	}
 }
+
+unsigned int Vertex::get_training_error()
+{
+	if(this->is_leaf)
+		return this->pointset->get_training_error();
+	else
+		return this->under_child->get_training_error() + this->over_child->get_training_error();
+}

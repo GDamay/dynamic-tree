@@ -43,6 +43,7 @@ class PointSet {
 		size_t get_size();
 		float get_positive_proportion();
 		float get_gini();
+		unsigned int get_training_error();
 
 		// Provides true best gain, not proxy
 		double get_best_gain();

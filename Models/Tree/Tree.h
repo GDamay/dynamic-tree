@@ -36,6 +36,7 @@ class Tree {
 		void add_point(Point to_add);
 		void delete_point(const float* features, bool value);
 		void delete_point(Point to_delete);
-		bool decision(const float* features);		
+		bool decision(const float* features);
+		unsigned int get_training_error();
 };
 #endif // TREE_H_INCLUDED

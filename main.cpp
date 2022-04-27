@@ -32,6 +32,7 @@ struct test_result {
 	unsigned int true_negative = 0;
 	unsigned int false_positive = 0;
 	unsigned int false_negative = 0;
+	unsigned long total_training_error = 0;
 };
 
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
@@ -56,6 +57,7 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 					result.false_negative++;
 				else
 					result.true_negative++;
+			result.total_training_error += tree_to_update.get_training_error();
 		}
 	}
 	return result;
@@ -570,12 +572,13 @@ int main(int argc, char *argv[])
 		const std::chrono::duration<double, std::milli> init_time = t2 - t1;
 		const std::chrono::duration<double, std::milli> iter_time = t4 - t3;
 		if(is_output_csv)
-			std::cout << ";" << init_time.count() << ";" << iter_time.count() << ";" << Vertex::get_nb_build() << std::endl;
+			std::cout << ";" << init_time.count() << ";" << iter_time.count() << ";" << Vertex::get_nb_build() << ";" <<  (double)result.total_training_error / (result.true_positive + result.true_negative + result.false_positive + result.false_negative) << std::endl;
 		else
 		{
 			std::cout << "Initialization time (ms) : " << init_time.count() <<std::endl;
 			std::cout << "Iteration time (ms) : " << iter_time.count() <<std::endl;
 			std::cout << "Nb builds : " << Vertex::get_nb_build() << std::endl;
+			std::cout << "Mean training error : " << (double)result.total_training_error / (result.true_positive + result.true_negative + result.false_positive + result.false_negative) << std::endl;
 		}
 	}
     return 0;

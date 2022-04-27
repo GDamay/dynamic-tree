@@ -98,6 +98,12 @@ float PointSet::get_gini()
 	return this->gini;
 }
 
+unsigned int PointSet::get_training_error()
+{
+	unsigned int negative_counter = this->points.size() - this->positive_counter;
+	return this->positive_counter > negative_counter ? negative_counter : positive_counter;
+}
+
 void PointSet::calculate_best_gain()
 {
 	if(!this->is_gain_calculated)
