@@ -1,7 +1,10 @@
 #include "param_parser.h"
+#include <sstream>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <set>
+#include <map>
 #include <vector>
 #include <chrono>
 #include <queue>
@@ -35,6 +38,92 @@ struct test_result {
 	unsigned long total_training_error = 0;
 };
 
+// Returns dimension and set label_position and features_types
+// data_file will be a line after
+size_t read_header(std::fstream &data_file, char delimiter, size_t &label_position, std::vector<FeatureType> &features_types)
+{
+	size_t dimension;
+	std::string current_line;
+	std::string parsed;
+	std::stringstream current_line_stream;
+	bool label_position_found = false;
+	if(getline(data_file, current_line))
+	{
+		current_line_stream = stringstream(current_line);
+		for(dimension = 0; getline(current_line_stream,parsed, delimiter); dimension++)
+		{
+			if(parsed == "l")
+			{
+				if(label_position_found)
+					throw "Error : label identifier found twice in the header (should contain exactly 1 'l' identifier";
+				label_position = dimension;
+				label_position_found=true;
+			}
+			else if(parsed == "n")
+				features_types.push_back(FeatureType::REAL);
+			else if(parsed == "c")
+				features_types.push_back(FeatureType::CLASSIFIED);
+			else if(parsed == "b")
+				features_types.push_back(FeatureType::BINARY);
+			else
+				throw "Error : found unknown item identifier in header : \"" + parsed + "\"";
+		}
+	}
+	else
+		throw "Error : file is empty or contains only line to skip";
+
+	if(!label_position_found)
+		throw "Error : no label identifier found in the header (should contain exactly 1 'l' identifier";
+	
+	return dimension;
+}
+
+Point point_from_line(std::string current_line,
+									char delimiter,
+									size_t dimension,
+									size_t label_position,
+									std::vector<FeatureType> features_types,
+									std::string label_true_value,
+									std::vector<std::map<std::string, float>> &class_txt_to_index,
+									std::vector<float> &next_classification_id)
+{
+    std::string parsed;
+	float* features = new float[dimension];
+	bool current_point_value;
+	std::stringstream current_line_stream = stringstream(current_line);
+	float related_val;
+	for(size_t j = 0; getline(current_line_stream,parsed, delimiter); j++)
+	{
+		if(j > dimension)
+			throw "Error : too many data";
+		if(j==label_position)
+			current_point_value = parsed==label_true_value;
+		else
+		{
+			FeatureType current_feature_type = features_types[j - (label_position<j)];
+			if(current_feature_type == FeatureType::REAL)
+				related_val = std::stof(parsed);
+			else
+			{
+				auto related_val_it = class_txt_to_index[j].find(parsed);
+				if(related_val_it == class_txt_to_index[j].end())
+				{
+					related_val = next_classification_id[j];
+					next_classification_id[j]++;
+					class_txt_to_index[j][parsed] = related_val;
+					if(current_feature_type == FeatureType::BINARY && related_val > 1)
+						throw "Error : at least 3 different values found for a feature supposed to be binary";
+				}
+				else
+					related_val = related_val_it->second;
+			}
+		}
+		features[j - (label_position<j)] = related_val;
+	}
+	delete features;
+	return Point(dimension, features, current_point_value);
+}
+
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
 {
 	test_result result;
@@ -64,10 +153,8 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 }
 
 Tree random_from_file(std::string file_name,
-				size_t dimension,
+				std::string label_true_value,
 				char delimiter,
-				size_t label_position,
-				float label_true_value,
 				unsigned int initial_size, double eval_proba,
 				unsigned int number_of_updates, double insert_probability,
 				unsigned int seed,
@@ -80,14 +167,24 @@ Tree random_from_file(std::string file_name,
 				float epsilon_transmission)
 {
 	// --- Reading file ---
+	size_t dimension;
+	size_t label_position;
 	std::vector<Point> points_in_file;
     std::fstream data_file(file_name);
     std::string current_line;
+	std::vector<FeatureType> features_types;
+
     if (data_file.is_open()) {
 		if(skip_first_line)
             getline(data_file, current_line);
+
+        dimension = read_header(data_file, delimiter, label_position, features_types);
+
+		std::vector<float> next_classification_id(dimension+1, 0.0);
+		std::vector<std::map<std::string, float>> class_txt_to_index(dimension+1, std::map<std::string, float>());
+
         for(size_t i = 0; getline(data_file, current_line); i++)
-			points_in_file.push_back(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value));
+			points_in_file.push_back(point_from_line(current_line, delimiter, dimension, label_position, features_types, label_true_value, class_txt_to_index, next_classification_id));
 
     }
     else
@@ -134,14 +231,12 @@ Tree random_from_file(std::string file_name,
 			already_added_points.erase(to_del);
 		}
 	}
-    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
 Tree window_from_file(std::string file_name,
-                size_t dimension,
+				std::string label_true_value,
                 char delimiter,
-                size_t label_position,
-                float label_true_value,
                 unsigned int window_size, double eval_proba,
 				unsigned int seed,
                 std::vector<tree_event> &event_vector,
@@ -152,33 +247,44 @@ Tree window_from_file(std::string file_name,
 				float min_split_gini,
 				float epsilon_transmission)
 {
+	size_t dimension;
+	size_t label_position;
     std::multiset<Point*> tree_points;
 	std::queue<Point> points_to_delete;
 	srand(seed);
     std::fstream data_file(file_name);
     std::string current_line;
+	std::vector<FeatureType> features_types;
+
     if (data_file.is_open()) {
 		if(skip_first_line)
             getline(data_file, current_line);
+
+        dimension = read_header(data_file, delimiter, label_position, features_types);
+
+		std::vector<float> next_classification_id(dimension+1, 0.0);
+		std::vector<std::map<std::string, float>> class_txt_to_index(dimension+1, std::map<std::string, float>());
+ 
         for(size_t i = 0; getline(data_file, current_line); i++)
         {
-			points_to_delete.push(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value));
+			Point current_point = point_from_line(current_line, delimiter, dimension, label_position, features_types, label_true_value, class_txt_to_index, next_classification_id);
+			points_to_delete.push(Point(current_point));
             if(i < window_size)
 			{
-                Point* new_point = new Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value);
+                Point* new_point = new Point(current_point);
                 tree_points.insert(new_point);
 			}
 			else
 			{
 				if(((double) rand() / (RAND_MAX)) < eval_proba)
 				{
-					tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::EVAL);
+					tree_event new_event(Point(current_point), event_type::EVAL);
 					event_vector.push_back(new_event);
 				}
 				tree_event del_event(points_to_delete.front(), event_type::DEL);
 				event_vector.push_back(del_event);
 				points_to_delete.pop();
-				tree_event add_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::ADD);
+				tree_event add_event(Point(current_point), event_type::ADD);
 				event_vector.push_back(add_event);
 			}
         }
@@ -186,15 +292,13 @@ Tree window_from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
 // Needed for not having to make generic constructor for Tree
 Tree branched_from_file(std::string file_name,
-	size_t dimension,
 	char delimiter,
-	size_t label_position,
-	float label_true_value,
+	std::string label_true_value,
 	unsigned int dataset_size, double eval_proba,
 	unsigned int number_of_updates, double insert_probability,
 	unsigned int seed,
@@ -209,10 +313,8 @@ Tree branched_from_file(std::string file_name,
 {
 	if (type_of_building == algo_type::SLIDING)
 		return window_from_file(file_name,
-			dimension,
-			delimiter,
-			label_position,
 			label_true_value,
+			delimiter,
 			dataset_size,
 			eval_proba,
 			seed,
@@ -225,10 +327,8 @@ Tree branched_from_file(std::string file_name,
 			epsilon_transmission);
 	else
 		return random_from_file(file_name,
-			dimension,
-			delimiter,
-			label_position,
 			label_true_value,
+			delimiter,
 			dataset_size,
 			eval_proba,
 			number_of_updates,
@@ -246,8 +346,7 @@ Tree branched_from_file(std::string file_name,
 Tree from_file(std::string file_name,
                 size_t dimension,
                 char delimiter,
-                size_t label_position,
-                float label_true_value,
+                std::string label_true_value,
                 std::vector<size_t> add_indices, std::vector<size_t> del_indices, std::vector<size_t> eval_indices,
                 std::vector<tree_event> &event_vector,
 				bool skip_first_line,
@@ -257,40 +356,50 @@ Tree from_file(std::string file_name,
 				float min_split_gini,
 				float epsilon_transmission)
 {
+    size_t label_position;
     std::multiset<Point*> tree_points;
     auto it_add = add_indices.begin();
     auto it_del = del_indices.begin();
     auto it_eval = eval_indices.begin();
     std::fstream data_file(file_name);
     std::string current_line;
+	std::vector<FeatureType> features_types;
+
     if (data_file.is_open()) {
 		if(skip_first_line)
             getline(data_file, current_line);
+
+        dimension = read_header(data_file, delimiter, label_position, features_types);
+
+		std::vector<float> next_classification_id(dimension+1, 0.0);
+		std::vector<std::map<std::string, float>> class_txt_to_index(dimension+1, std::map<std::string, float>());
+
         for(size_t i = 0; getline(data_file, current_line); i++)
         {
+			Point current_point = point_from_line(current_line, delimiter, dimension, label_position, features_types, label_true_value, class_txt_to_index, next_classification_id);
             size_t val_it_add = it_add == add_indices.end() ? UINTMAX_MAX : *it_add;
             size_t val_it_del = it_del == del_indices.end() ? UINTMAX_MAX : *it_del;
             size_t val_it_eval = it_eval == eval_indices.end() ? UINTMAX_MAX : *it_eval;
             if(i == val_it_del || (i != val_it_add && i != val_it_eval))
 			{
-                Point* new_point = new Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value);
+                Point* new_point = new Point(current_point);
                 tree_points.insert(new_point);
 			}
 			if(i == val_it_del)
 			{
-				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::DEL);
+				tree_event new_event(Point(current_point), event_type::DEL);
 				event_vector.push_back(new_event);
 				it_del++;
 			}
 			if(i == val_it_eval)
 			{
-				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::EVAL);
+				tree_event new_event(Point(current_point), event_type::EVAL);
 				event_vector.push_back(new_event);
 				it_eval++;
 			}
             if(i == val_it_add)
             {
-				tree_event new_event(Point(current_line, dimension, delimiter, (unsigned int)label_position, label_true_value), event_type::ADD);
+				tree_event new_event(Point(current_point), event_type::ADD);
 				event_vector.push_back(new_event);
 				it_add++;
             }
@@ -299,7 +408,7 @@ Tree from_file(std::string file_name,
     else
         throw "Error when oppening the data file";
     data_file.close();
-    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission);
+    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
 int main(int argc, char *argv[])
@@ -351,27 +460,13 @@ int main(int argc, char *argv[])
 			"",
 			"Name of the file containing data",
 			""),
-		param_setting(true,
-			true,
-			"dimension",
-			"",
-			"",
-			"Dimension of the features for each point (not counting the label)",
-			""),
-		param_setting(false,
-			false,
-			"label_position",
-			"-p",
-			"--label_position",
-			"Position of the label in the file (0 is the first data)",
-			"0"),
 		param_setting(false,
 			false,
 			"label_true_value",
 			"-v",
 			"--true_value",
 			"Value of the label that will be considered as true",
-			"1.0"),
+			"1"),
 		param_setting(false,
 			false,
 			"delimiter",
@@ -384,7 +479,7 @@ int main(int argc, char *argv[])
 			"skip_first_line",
 			"-s",
 			"--skip",
-			"Indicates that file has a header line",
+			"Indicates that file has a header line before the one describing fields types",
 			"",
 			true),
 		param_setting(false,
@@ -491,10 +586,8 @@ int main(int argc, char *argv[])
 	if(parse_param(settings, argc, argv, parsed_params))
 		return 0;
 	std::string file_name = parsed_params["file_name"];
-	size_t dimension = (size_t)std::stoul(parsed_params["dimension"]);
-	size_t label_position = (size_t)std::stoul(parsed_params["label_position"]);
-	float label_true_value = std::stof(parsed_params["label_true_value"]);
-	char delimiter = parsed_params["label_true_value"][0];
+	std::string label_true_value = parsed_params["label_true_value"];
+	char delimiter = parsed_params["delimiter"][0];
 	bool skip_first_line = parsed_params["skip_first_line"] == BOOLEAN_TRUE_VALUE;
 	float epsilon = std::stof(parsed_params["epsilon"]);
 	unsigned int dataset_size = (unsigned int)std::stoul(parsed_params["dataset_size"]);
@@ -528,9 +621,7 @@ int main(int argc, char *argv[])
 */
 
 	Tree reference_tree = branched_from_file(file_name,
-                dimension,
                 delimiter,
-                label_position,
                 label_true_value,
 				dataset_size,
 				eval_proba,

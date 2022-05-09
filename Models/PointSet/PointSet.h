@@ -4,11 +4,16 @@
 
 #include <set>
 #include <array>
+#include <vector>
 #include "Point.h"
+
+enum class FeatureType {BINARY, CLASSIFIED, REAL};
 
 class PointSet {
 	private:
 		std::multiset<Point*> points;
+		std::vector<FeatureType> features_types;
+		std::vector<bool> is_feature_relevent;
 		size_t dimension;
 		unsigned int positive_counter;
 		float positive_proportion;
@@ -34,7 +39,7 @@ class PointSet {
 		void calculate_best_gain();
 	
 	public:
-		PointSet(std::multiset<Point*> points, size_t dimension);
+		PointSet(std::multiset<Point*> points, size_t dimension, std::vector<FeatureType> features_types, std::vector<bool> is_feature_relevent);
 		PointSet(const PointSet& source);
 		PointSet(const PointSet& source, std::multiset<Point*> new_points);
 		PointSet& operator=(const PointSet& source);

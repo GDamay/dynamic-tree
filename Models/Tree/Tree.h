@@ -3,8 +3,10 @@
 #define TREE_H_INCLUDED
 
 #include <set>
+#include <vector>
 #include "Vertex.h"
 #include "../PointSet/Point.h"
+#include "../PointSet/PointSet.h"
 
 class Tree {
 	private:
@@ -22,7 +24,7 @@ class Tree {
 		float epsilon_transmission;
 	public:
 		//Takes ownership
-		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission);
+		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission, std::vector<FeatureType> features_types);
 
 		//Used when making several successive tests for avoiding go through the entire initialisation process several time
 		Tree(const Tree& source, float epsilon, float epsilon_transmission);

@@ -1,8 +1,7 @@
 #include "Tree.h"
-#include "../PointSet/PointSet.h"
 #include <numeric>
 
-Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points, float min_split_gini, float epsilon_transmission) :
+Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission, std::vector<FeatureType> features_types):
 	list_of_points(list_of_points.begin(), list_of_points.end()),
 	dimension(dimension),
 	max_height(max_height),
@@ -11,7 +10,8 @@ Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int 
 	min_split_gini(min_split_gini),
 	epsilon_transmission(epsilon_transmission)
 {
-	PointSet* first_set = new PointSet(list_of_points, dimension);
+	std::vector<bool> relevant_features(dimension, true);
+	PointSet* first_set = new PointSet(list_of_points, dimension, features_types, relevant_features);
 	this->root = new Vertex(first_set, NULL, max_height-1, epsilon, min_split_points, min_split_gini, epsilon_transmission, true);
 }
 
