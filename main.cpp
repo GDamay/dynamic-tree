@@ -75,7 +75,7 @@ size_t read_header(std::fstream &data_file, char delimiter, size_t &label_positi
 	if(!label_position_found)
 		throw "Error : no label identifier found in the header (should contain exactly 1 'l' identifier";
 	
-	return dimension;
+	return dimension - 1;
 }
 
 Point point_from_line(std::string current_line,
@@ -92,7 +92,8 @@ Point point_from_line(std::string current_line,
 	bool current_point_value;
 	std::stringstream current_line_stream = stringstream(current_line);
 	float related_val;
-	for(size_t j = 0; getline(current_line_stream,parsed, delimiter); j++)
+	size_t j;
+	for(j = 0; getline(current_line_stream,parsed, delimiter); j++)
 	{
 		if(j > dimension)
 			throw "Error : too many data";
@@ -120,7 +121,8 @@ Point point_from_line(std::string current_line,
 		}
 		features[j - (label_position<j)] = related_val;
 	}
-	delete features;
+	if (j < dimension + 1)
+		throw "Error : too few dimensions";
 	return Point(dimension, features, current_point_value);
 }
 

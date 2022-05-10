@@ -290,12 +290,12 @@ std::array<PointSet*, 2> PointSet::split_at_best()
 	std::vector<bool> is_feature_relevent_over(is_feature_relevent);
 	if(this->features_types[this->best_parameter] == FeatureType::BINARY)
 	{
-		is_feature_relevent_under[this->best_parameter] == false;
-		is_feature_relevent_over[this->best_parameter] == false;
+		is_feature_relevent_under[this->best_parameter] = false;
+		is_feature_relevent_over[this->best_parameter] = false;
 	}
 	else if(this->features_types[this->best_parameter] == FeatureType::CLASSIFIED)
 	{
-		is_feature_relevent_over[this->best_parameter] == false;
+		is_feature_relevent_over[this->best_parameter] = false;
 	}
 	std::array<PointSet*, 2> to_return = {
 		new PointSet(points_multisets[0], this->dimension, this->features_types, is_feature_relevent_under), 
