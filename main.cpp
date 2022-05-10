@@ -90,7 +90,7 @@ Point point_from_line(std::string current_line,
     std::string parsed;
 	float* features = new float[dimension];
 	bool current_point_value;
-	std::stringstream current_line_stream = stringstream(current_line);
+	std::stringstream current_line_stream(current_line);
 	float related_val;
 	size_t j;
 	for(j = 0; getline(current_line_stream,parsed, delimiter); j++)
@@ -118,8 +118,8 @@ Point point_from_line(std::string current_line,
 				else
 					related_val = related_val_it->second;
 			}
+			features[j - (label_position < j)] = related_val;
 		}
-		features[j - (label_position<j)] = related_val;
 	}
 	if (j < dimension + 1)
 		throw "Error : too few dimensions";
