@@ -50,7 +50,7 @@ size_t find(char *argv[], size_t begin, size_t size, std::string searched_obj)
 }
 
 // Return true if param "--help" was given, and therefore program has to return
-bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], std::map<std::string, std::string> &parsed_params)
+bool parse_param(std::string help_message, std::vector<param_setting> settings, int argc, char *argv[], std::map<std::string, std::string> &parsed_params)
 {
 	size_t pos = find(argv, 0, argc, "--help");
 	if(pos < argc)
@@ -59,6 +59,8 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 		for(auto it = settings.begin(); it != settings.end() && (*it).is_positional; it++)
 			std::cout << " " << (*it).return_name;
 		std::cout << " " << "[OPTIONS]" << std::endl << std::endl;
+
+		std::cout << help_message << std::endl << std::endl;
 
 		std::cout << "Positional arguments:" <<std::endl;
 		auto it = settings.begin();

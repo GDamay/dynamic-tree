@@ -585,8 +585,24 @@ int main(int argc, char *argv[])
 			"For making several tests, set this to the step between epsilons to test",
 			"0.1")
 	};
+	std::string help_message = std::string("This program runs the Dynamic Decision Tree algorithm (see [paper to be published]).\n")
+	+ std::string("The input file MUST be a csv featuring an header with as many columns as the rest of the file. Each column MUST contain a single character, 'l' if the column contains the decision label, 'n' if the column is numerical, 'b' if the column is binary and 'c' if it is categorial. The file MAY also feature a single line containing data irrelevant for the algorithm, in which case this line MUST be at the beginning of the file, before the header, and the '-s' argument MUST be provided.\n")
+	+ std::string("If the '-c' argument is provided, the output will be formatted as csv without header. If several runs are made using various values for epsilon, each run will correspond to a single output line. The csv columns will be \n")
+	+ std::string(" - The seed used for the run\n")
+	+ std::string(" - The value of epsilon for this run\n")
+	+ std::string(" - The number of True Positive results of the tests\n")
+	+ std::string(" - The number of True Negative results of the tests\n")
+	+ std::string(" - The number of False Positive results of the tests\n")
+	+ std::string(" - The number of False Negative results of the tests\n")
+	+ std::string(" - The time (in ms) spent for initializing the tree\n")
+	+ std::string(" - The total time (in ms) spent for making all the iterations of this run\n")
+	+ std::string(" - The number of vertices (including leaves) that have been rebuild during the iterations\n")
+	+ std::string(" - The mean training error, evaluated along all iterations\n")
+	+ std::string("An header of the output csv could therefore be :\n")
+	+ std::string("seed;current_epsilon;true_positive;true_negative;false_positive;false_negative;init_time;iter_time;nb_build;mean_training_error");
+
 	std::map<std::string, std::string> parsed_params;
-	if(parse_param(settings, argc, argv, parsed_params))
+	if(parse_param(help_message, settings, argc, argv, parsed_params))
 		return 0;
 	std::string file_name = parsed_params["file_name"];
 	std::string label_true_value = parsed_params["label_true_value"];
