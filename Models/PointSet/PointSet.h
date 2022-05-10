@@ -57,6 +57,7 @@ class PointSet {
 
 		void add_point(Point* new_point);
 		void delete_point(Point* old_point);
+		FeatureType get_feature_type(size_t feature);
 		
 		//Gives ownership
 		std::array<PointSet*, 2> split_at_best();

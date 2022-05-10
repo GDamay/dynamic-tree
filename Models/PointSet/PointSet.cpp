@@ -283,6 +283,12 @@ void PointSet::delete_point(Point* old_point)
 	this->is_gain_calculated = false;
 }
 
+
+FeatureType PointSet::get_feature_type(size_t feature)
+{
+	return this->features_types[feature];
+}
+
 std::array<PointSet*, 2> PointSet::split_at_best()
 {
 	auto points_multisets = this->split_at_best_multiset();

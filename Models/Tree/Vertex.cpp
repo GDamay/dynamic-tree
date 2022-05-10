@@ -118,7 +118,11 @@ unsigned int Vertex::add_point(Point* new_point)
 		}
 		else
 		{
-			Vertex* to_update = (*new_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+			Vertex* to_update;
+			if (this->pointset->get_feature_type(split_parameter) == FeatureType::REAL)
+				to_update = (*new_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+			else
+				to_update = (*new_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 			unsigned int threshold = to_update->add_point(new_point);
 			if(threshold > 0 && this->pointset->get_size() < threshold)
 				if(this->is_root)
@@ -151,7 +155,11 @@ unsigned int Vertex::delete_point(Point* old_point)
 	}
 	else if(!this->is_leaf)
 	{
-		Vertex* to_update = (*old_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+		Vertex* to_update;
+		if(this->pointset->get_feature_type(split_parameter) == FeatureType::REAL)
+			to_update = (*old_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+		else
+			to_update = (*old_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 		unsigned int threshold = to_update->delete_point(old_point);
 		if(threshold > 0 && this->pointset->get_size() < threshold)
 			if(this->is_root)
@@ -173,7 +181,14 @@ bool Vertex::decision(const float* features)
 	if(this->is_leaf)
 		return this->pointset->get_positive_proportion() >= 0.5;
 	else
-		return features[this->split_parameter] <= split_threshold ? this->under_child->decision(features) : this->over_child->decision(features);
+	{
+		Vertex* decision_vertex;
+		if (this->pointset->get_feature_type(split_parameter) == FeatureType::REAL)
+			decision_vertex = features[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+		else
+			decision_vertex = features[split_parameter] == split_threshold ? this->over_child : this->under_child;
+		return decision_vertex->decision(features);
+	}
 }
 
 std::vector<std::string> Vertex::to_string()
