@@ -1,5 +1,6 @@
 #include "Tree.h"
 #include <numeric>
+#include <stdexcept>
 
 Tree::Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission, std::vector<FeatureType> features_types):
 	list_of_points(list_of_points.begin(), list_of_points.end()),
@@ -69,7 +70,7 @@ void Tree::delete_point(const float* features, bool value)
 	Point pattern_to_delete(this->dimension, features, value);
 	auto it_to_delete = this->list_of_points.find(&pattern_to_delete);
 	if(it_to_delete == this->list_of_points.end())
-		throw "Error : Point does not exists";
+		throw std::runtime_error("Error : Point does not exists");
 	this->root->delete_point(*it_to_delete);
 	delete *it_to_delete;
 	this->list_of_points.erase(it_to_delete);

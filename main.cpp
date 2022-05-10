@@ -10,6 +10,7 @@
 #include <queue>
 #include <random>
 #include <algorithm>
+#include <stdexcept>
 #include "Models/PointSet/Point.h"
 #include "Models/PointSet/PointSet.h"
 #include "Models/Tree/Vertex.h"
@@ -55,7 +56,7 @@ size_t read_header(std::fstream &data_file, char delimiter, size_t &label_positi
 			if(parsed == "l")
 			{
 				if(label_position_found)
-					throw "Error : label identifier found twice in the header (should contain exactly 1 'l' identifier";
+					throw std::runtime_error("Error : label identifier found twice in the header (should contain exactly 1 'l' identifier");
 				label_position = dimension;
 				label_position_found=true;
 			}
@@ -66,14 +67,14 @@ size_t read_header(std::fstream &data_file, char delimiter, size_t &label_positi
 			else if(parsed == "b")
 				features_types.push_back(FeatureType::BINARY);
 			else
-				throw "Error : found unknown item identifier in header : \"" + parsed + "\"";
+				throw std::runtime_error("Error : found unknown item identifier in header : \"" + parsed + "\"");
 		}
 	}
 	else
-		throw "Error : file is empty or contains only line to skip";
+		throw std::runtime_error("Error : file is empty or contains only line to skip");
 
 	if(!label_position_found)
-		throw "Error : no label identifier found in the header (should contain exactly 1 'l' identifier";
+		throw std::runtime_error("Error : no label identifier found in the header (should contain exactly 1 'l' identifier");
 	
 	return dimension - 1;
 }
@@ -96,7 +97,7 @@ Point point_from_line(std::string current_line,
 	for(j = 0; getline(current_line_stream,parsed, delimiter); j++)
 	{
 		if(j > dimension)
-			throw "Error : too many data";
+			throw std::runtime_error("Error : too many data");
 		if(j==label_position)
 			current_point_value = parsed==label_true_value;
 		else
@@ -113,7 +114,7 @@ Point point_from_line(std::string current_line,
 					next_classification_id[j]++;
 					class_txt_to_index[j][parsed] = related_val;
 					if(current_feature_type == FeatureType::BINARY && related_val > 1)
-						throw "Error : at least 3 different values found for a feature supposed to be binary";
+						throw std::runtime_error("Error : at least 3 different values found for a feature supposed to be binary");
 				}
 				else
 					related_val = related_val_it->second;
@@ -122,7 +123,7 @@ Point point_from_line(std::string current_line,
 		}
 	}
 	if (j < dimension + 1)
-		throw "Error : too few dimensions";
+		throw std::runtime_error("Error : too few dimensions");
 	return Point(dimension, features, current_point_value);
 }
 
@@ -190,7 +191,7 @@ Tree random_from_file(std::string file_name,
 
     }
     else
-        throw "Error when oppening the data file";
+        throw std::runtime_error("Error when oppening the data file");
     data_file.close();
 
 	// --- Building events ---
@@ -292,7 +293,7 @@ Tree window_from_file(std::string file_name,
         }
     }
     else
-        throw "Error when oppening the data file";
+        throw std::runtime_error("Error when oppening the data file");
     data_file.close();
     return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
@@ -408,7 +409,7 @@ Tree from_file(std::string file_name,
         }
     }
     else
-        throw "Error when oppening the data file";
+        throw std::runtime_error("Error when oppening the data file");
     data_file.close();
     return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
@@ -602,7 +603,7 @@ int main(int argc, char *argv[])
 	else if(parsed_params["test_type"] == "R" || parsed_params["test_type"] == "RANDOM")
 			current_algo_type = algo_type::RANDOM;
 	else
-			throw "Unknown algo type : " + parsed_params["test_type"];
+			throw std::runtime_error("Unknown algo type : " + parsed_params["test_type"]);
 	unsigned int nb_updates = (unsigned int)std::stoul(parsed_params["nb_updates"]);
 	float insert_proba = std::stof(parsed_params["insert_proba"]);
 	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;

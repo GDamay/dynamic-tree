@@ -12,6 +12,7 @@
 #include <math.h>
 #include <string>
 #include <iostream>
+#include <stdexcept>
 
 struct param_setting {
 	bool is_mandatory;
@@ -86,7 +87,7 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 		if(!are_still_positional && (*it).is_positional)
 		{
 			std::cerr << "Error : all positional arguments should be at the beginning of the setting" << std::endl;
-			throw "Error : all positional arguments should be at the beginning of the setting";
+			throw std::runtime_error("Error : all positional arguments should be at the beginning of the setting");
 		}
 		are_still_positional = (*it).is_positional;
 		if(are_still_positional)
@@ -101,7 +102,7 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 			else
 			{
 				std::cerr << "Error: Missing required positional parameter" << std::endl;
-				throw "Error: Missing required positional parameter";
+				throw std::runtime_error("Error: Missing required positional parameter");
 			}
 		}
 		else
@@ -128,7 +129,7 @@ bool parse_param(std::vector<param_setting> settings, int argc, char *argv[], st
 			else
 			{
 				std::cerr << "Error: Missing required non-positional parameter" << std::endl;
-				throw "Error: Missing required non-positional parameter";
+				throw std::runtime_error("Error: Missing required non-positional parameter");
 			}
 		}
 	}
