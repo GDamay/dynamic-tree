@@ -67,7 +67,7 @@ Point::Point(const Point& source)
 
 Point::~Point()
 {
-	delete this->features;
+	delete [] this->features;
 }
 
 size_t Point::get_dimension()

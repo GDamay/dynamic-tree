@@ -124,7 +124,9 @@ Point point_from_line(std::string current_line,
 	}
 	if (j < dimension + 1)
 		throw std::runtime_error("Error : too few dimensions");
-	return Point(dimension, features, current_point_value);
+	Point to_return(dimension, features, current_point_value);
+	delete [] features;
+	return to_return;
 }
 
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
