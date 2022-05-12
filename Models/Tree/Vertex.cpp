@@ -70,7 +70,7 @@ Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_po
 Vertex::~Vertex()
 {
 	delete this->pointset;
-	if(!this->under_child)
+	if(this->under_child != NULL)
 	{
 		delete this->under_child;
 		delete this->over_child;
@@ -80,7 +80,7 @@ Vertex::~Vertex()
 void Vertex::build()
 {
 	Vertex::nb_build++;
-	if(!this->under_child)
+	if(this->under_child != NULL)
 	{
 		delete this->under_child;
 		delete this->over_child;
