@@ -73,7 +73,9 @@ Vertex::~Vertex()
 	if(this->under_child != NULL)
 	{
 		delete this->under_child;
+		this->under_child=NULL;
 		delete this->over_child;
+		this->over_child=NULL;
 	}
 }
 
@@ -83,7 +85,9 @@ void Vertex::build()
 	if(this->under_child != NULL)
 	{
 		delete this->under_child;
+		this->under_child=NULL;
 		delete this->over_child;
+		this->over_child=NULL;
 	}
 	if(this->remaining_high == 0 ||	this->pointset->get_size() <= this->min_split_points || this->pointset->get_gini() <= this->min_split_gini || this->pointset->get_best_gain() <= 0)
 	{
