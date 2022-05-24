@@ -70,20 +70,24 @@ Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_po
 Vertex::~Vertex()
 {
 	delete this->pointset;
-	if(!this->under_child)
+	if(this->under_child != NULL)
 	{
 		delete this->under_child;
+		this->under_child=NULL;
 		delete this->over_child;
+		this->over_child=NULL;
 	}
 }
 
 void Vertex::build()
 {
 	Vertex::nb_build++;
-	if(!this->under_child)
+	if(this->under_child != NULL)
 	{
 		delete this->under_child;
+		this->under_child=NULL;
 		delete this->over_child;
+		this->over_child=NULL;
 	}
 	if(this->remaining_high == 0 ||	this->pointset->get_size() <= this->min_split_points || this->pointset->get_gini() <= this->min_split_gini || this->pointset->get_best_gain() <= 0)
 	{
