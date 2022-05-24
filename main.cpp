@@ -665,6 +665,7 @@ int main(int argc, char *argv[])
 
 	for(float current_epsilon = epsilon; current_epsilon <= epsilon_max; current_epsilon += epsilon_step)
 	{
+		epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? current_epsilon : epsilon_transmission;
 		Tree current_tree(reference_tree, current_epsilon, epsilon_transmission);
 		Vertex::reset_nb_build();
 		const auto t3 = std::chrono::high_resolution_clock::now();
