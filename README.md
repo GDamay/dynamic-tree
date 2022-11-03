@@ -1,6 +1,6 @@
 # Fully Dynamic Decision Tree
 
-This project implements the algorithm proposed in *Add link to article (article not published so far*
+This project implements the algorithm proposed in *Add link to article (article not published so far)*
 
 This algorithm presents a structure for dynamic decision trees that minimise the amortized cost of updating the tree.
 
