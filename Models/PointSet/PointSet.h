@@ -45,7 +45,7 @@ class PointSet {
 		 * Points.
 		 *
 		 * @note For categorial features, this will be false only if the
-		 *	vertex is under the "true" leg of the split vertex, since
+		 *		vertex is under the "true" leg of the split vertex, since
 		 * 	on the "false" leg, diversity could still exist between values
 		 * 	other than the split one.
 		 */
@@ -145,8 +145,41 @@ class PointSet {
 		void calculate_best_gain();
 	
 	public:
+		/**
+		 * Main constructor of PointSet
+		 * 
+		 * Construct a PointSet by providing each of its attributes
+		 * 
+		 * @param points Pointers to all points to be contained in the PointSet.
+		 * 	Does not take ownership of the points, since all points are always
+		 * 	owned by the Tree.
+		 * @param dimension Dimension of the points features arrays.
+		 * 	The dimensions of the points should always be equal to this
+		 * @param features_types Lists the types of each feature for the points
+		 * @param is_feature_relevent Indicates for each feature if it is still
+		 * 	relevant to try and split along it.
+		 * 	A feature becomes irrelevent when it is binary and have already
+		 * 	serve for splitting, or it is classified, have already been used for
+		 * 	splitting, and the current leg it the one in wich the feature
+		 * 	matches the selected class. 
+		 */
 		PointSet(std::multiset<Point*> points, size_t dimension, std::vector<FeatureType> features_types, std::vector<bool> is_feature_relevent);
+
+		/**
+		 * Copy constructor of PointSet
+		 * 
+		 * Construct PointSet by copying all parameters of source.
+		 * If gain has already been calculated, also copy the related data.
+		 * 
+		 * @param source PointSet from wich data will be copied
+		 * @warning The points in the set will not be duplicated, only pointers
+		 * 	will
+		 */
 		PointSet(const PointSet& source);
+
+		/**
+		 * 
+		 */
 		PointSet(const PointSet& source, std::multiset<Point*> new_points);
 		PointSet& operator=(const PointSet& source);
 		~PointSet();

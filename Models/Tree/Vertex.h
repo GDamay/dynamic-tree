@@ -36,7 +36,7 @@ class Vertex {
 		//Takes ownership of pointset, not of parent
 		Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, float epsilon, unsigned int min_split_points, float min_split_gini, float epsilon_transmission, bool is_root = false);
 		Vertex(const Vertex& source, Vertex* parent, PointSet* pointset);
-		Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
+		//Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
 		~Vertex();
 		void build();
 		//Return threshold of size to rebuild, or 0 if no rebuild is needed

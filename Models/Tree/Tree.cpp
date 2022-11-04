@@ -23,7 +23,7 @@ Tree::Tree(const Tree& source, float epsilon, float epsilon_transmission) :
 	epsilon(epsilon),
 	min_split_points(source.min_split_points),
 	min_split_gini(source.min_split_gini),
-	epsilon_transmission(source.epsilon_transmission)
+	epsilon_transmission(epsilon_transmission)
 {
 	for(auto it = source.list_of_points.begin(); it != source.list_of_points.end(); it++)
 	{
