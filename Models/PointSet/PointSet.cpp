@@ -166,16 +166,19 @@ void PointSet::calculate_best_gain()
 			this->best_gain = NAN;
 			this->best_threshold = NAN;
 			this->best_parameter = 0;
-			// Find best param/threshold
+			// --- For all dimensions
 			for(size_t current_dim = 0; current_dim < this->dimension; current_dim++)
 			{
+				// If the feature is real, we have to sort the point according to the feature and then splitting somewhere in this ordered sequence
 				if(this->features_types[current_dim] == FeatureType::REAL)
 				{
 					std::sort(points_vector.begin(), points_vector.end(), [current_dim](Point* const &a, Point* const &b) { return (*a)[current_dim] < (*b)[current_dim]; });
+					// We initialize with only one point under and all other points over the splitting threshold
 					under_counter = 1;
 					under_positive_counter = points_vector[0]->get_value();
 					over_counter = (unsigned int)this->points.size() - 1;
 					over_positive_counter = this->positive_counter - points_vector[0]->get_value();
+					// --- For points in vector
 					for(auto it = points_vector.begin(); it != points_vector.end();)
 					{
 						current_param_value = (*it)->get_feature(current_dim);
@@ -189,11 +192,13 @@ void PointSet::calculate_best_gain()
 							over_counter--;
 							over_positive_counter -= (*it)->get_value();
 						}
+						// --- If iterator not at end
 						if(it != points_vector.end())
 						{
 							fraction_under = (double)under_positive_counter/(double)under_counter;
 							fraction_over = (double)over_positive_counter/(double)over_counter;
 							current_gain = -((double)under_positive_counter*(1-fraction_under) + (double)over_positive_counter*(1-fraction_over));
+							// --- If best param/threshold
 							if(isnan(this->best_gain) || current_gain > this->best_gain)
 							{
 								this->best_under_counter = under_counter;
@@ -203,13 +208,13 @@ void PointSet::calculate_best_gain()
 								this->best_gain = current_gain;
 								this->best_parameter = current_dim;
 								this->best_threshold = (current_param_value + (*it)->get_feature(current_dim))/2;
-							} // If Best param/threshold
+							} // --- If best param/threshold
 							under_counter++;
 							under_positive_counter += (*it)->get_value();
 							over_counter--;
 							over_positive_counter -= (*it)->get_value();
-						} // If iterator not at end
-					} // For points in vector
+						} // --- If iterator not at end
+					} // --- For points in vector
 				}
 				else if(this->is_feature_relevent[current_dim])
 				{
@@ -222,6 +227,7 @@ void PointSet::calculate_best_gain()
 						fraction_under = (double)under_positive_counter/(double)under_counter;
 						fraction_over = (double)over_positive_counter/(double)over_counter;
 						current_gain = -((double)under_positive_counter*(1-fraction_under) + (double)over_positive_counter*(1-fraction_over));
+						// --- If best param/theshold
 						if(isnan(this->best_gain) || current_gain > this->best_gain)
 						{
 							this->best_under_counter = under_counter;
@@ -231,10 +237,10 @@ void PointSet::calculate_best_gain()
 							this->best_gain = current_gain;
 							this->best_parameter = current_dim;
 							this->best_threshold = class_it->first;
-						} // If Best param/threshold
+						} // --- If best param/threshold
 					}
 				}
-			} // For all dimensions
+			} // --- For all dimensions
 		} // Else (of "if empty set of points")
 		this->is_gain_calculated = true;
 	} // If not calculated yet
@@ -270,7 +276,7 @@ void PointSet::add_point(Point* new_point)
 	this->is_gain_calculated = false;
 }
 
-
+// TODO : Raise exception if no point or multiple points erased and update documentation accordingly
 void PointSet::delete_point(Point* old_point)
 {
 	this->points.erase(old_point);
