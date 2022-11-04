@@ -492,8 +492,8 @@ int main(int argc, char *argv[])
 			"epsilon",
 			"-e",
 			"--epsilon",
-			"Epsilon of algorithm, determining when to rebuild node",
-			"0.2"),
+			"Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(min_split_gini/6, 1/(min_split_points+2))",
+			"-1"),
 		param_setting(false,
 			false,
 			"dataset_size",
@@ -610,7 +610,6 @@ int main(int argc, char *argv[])
 	std::string label_true_value = parsed_params["label_true_value"];
 	char delimiter = parsed_params["delimiter"][0];
 	bool skip_first_line = parsed_params["skip_first_line"] == BOOLEAN_TRUE_VALUE;
-	float epsilon = std::stof(parsed_params["epsilon"]);
 	unsigned int dataset_size = (unsigned int)std::stoul(parsed_params["dataset_size"]);
 	float eval_proba = std::stof(parsed_params["eval_proba"]);
 	unsigned int seed = parsed_params["seed"] == "-1" ? time(0) : (unsigned int)std::stoul(parsed_params["seed"]);
@@ -627,9 +626,10 @@ int main(int argc, char *argv[])
 	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;
 	unsigned int min_split_points = (unsigned int)std::stoul(parsed_params["min_split_points"]);
 	float min_split_gini = std::stof(parsed_params["min_split_gini"]);
+	float epsilon_step = std::stof(parsed_params["epsilon_step"]);
+	float epsilon = parsed_params["epsilon"] == "-1" ? std::min(min_split_gini/6,  float(1)/(min_split_points + 2)) : std::stof(parsed_params["epsilon"]);
 	float epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_transmission"]);
 	float epsilon_max = parsed_params["epsilon_max"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_max"]);
-	float epsilon_step = std::stof(parsed_params["epsilon_step"]);
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
