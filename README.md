@@ -40,3 +40,13 @@ cmake --build Build
 ```
 
 An executable will be created. On Linux, it will be *Build/dynamic_tree*, on Windows using Visual Studio, it will be *Build/Debug/dynamic_tree.exe* . Run `[path_to_executable] --help` to get further instructions.
+
+## Documentation generation
+
+This project is documented and configured so as to use [Doxygen](https://www.doxygen.nl/index.html) for generated html or pdf documentation. To generated the documentation, with doxygen installed and using a terminal in the root project folder, run the following :
+
+```
+doxygen Doxyfile
+```
+
+You can then access the html documentation by opening *Documentation/html/index.html* in a web browser. For further instructions on Doxygen use, please refer to the [Doxygen website](https://www.doxygen.nl/index.html).
