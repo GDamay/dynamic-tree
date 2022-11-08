@@ -43,7 +43,7 @@ An executable will be created. On Linux, it will be *Build/dynamic_tree*, on Win
 
 ## Documentation generation
 
-This project is documented and configured so as to use [Doxygen](https://www.doxygen.nl/index.html) for generated html or pdf documentation. To generated the documentation, with doxygen installed and using a terminal in the root project folder, run the following :
+This project is documented and configured so as to use [Doxygen](https://www.doxygen.nl/index.html) for generated html or pdf documentation. To generated the documentation, with doxygen installed, open the file *Doxyfile* in the Doxygen GUI or, using a terminal in the root project folder, run the following :
 
 ```
 doxygen Doxyfile
