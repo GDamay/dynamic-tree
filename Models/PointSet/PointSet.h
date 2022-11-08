@@ -11,7 +11,7 @@ enum class FeatureType {
 	BINARY, //< Binary feature, can be 0 or 1.
 	CLASSIFIED, //< Categorized feature, discrete and without logical order.
 	REAL //< Real feature, (almost) continuous and logically ordered.
-};
+}; //TODO : Solve problem preventing it to be in documentation
 
 /**
  * A subset of the dataset.\ Contains a collection of Points.
@@ -288,9 +288,9 @@ class PointSet {
 		 * 
 		 * @note This will update positive_proportion and toggle variable
 		 * 	indicating that gini and gain have to be recalculated
-		 * @note The pointer should point to a point belonging in the PointSet.
-		 * 	Providing pointer to a point that does not belong in the PointSet
-		 * 	would result in unexpected behaviour so far, and will raise
+		 * @warning The pointer should point to a point belonging in the 
+		 *  PointSet. Providing pointer to a point that does not belong in the 
+		 *  PointSet would result in unexpected behaviour so far, and will raise
 		 * 	exception in a later version
 		 */
 		void delete_point(Point* old_point);
