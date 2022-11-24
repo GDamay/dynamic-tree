@@ -46,14 +46,6 @@ class Point {
 		Point(size_t dimension, const float* features, const bool value);
 
 		/**
-		 * Interprete a file line as a point.
-		 *
-		 * Deprecated : does not manage binary/categorised features
-		 */
-		[[deprecated("Use point_from_file() instead")]]
-		Point(std::string input, size_t dimension, char delimiter, unsigned int label_position, float label_true_value);
-
-		/**
 		 * Point class assignment operator.
 		 *
 		 * Copy the data of the source object.
