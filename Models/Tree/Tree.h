@@ -102,7 +102,6 @@ class Tree {
 		 */
 		Tree(std::multiset<Point*> list_of_points, size_t dimension, unsigned int max_height, float epsilon, unsigned int min_split_points,	float min_split_gini, float epsilon_transmission, std::vector<FeatureType> features_types);
 
-		//Used when making several successive tests for avoiding go through the entire initialisation process several time
 		/**
 		 * Enhanced copy constructor
 		 *

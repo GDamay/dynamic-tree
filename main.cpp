@@ -22,9 +22,6 @@
 #include "Models/Tree/Vertex.h"
 #include "Models/Tree/Tree.h"
 
-//constexpr auto DIMENSION = 3;
-//constexpr float EPSILON = (float)0.2;
-//constexpr auto MAX_HEIGHT = 5;
 using namespace std;
 
 /// Represents the type of test to run
@@ -555,122 +552,9 @@ Tree branched_from_file(std::string file_name,
 			epsilon_transmission);
 }
 
-/**
- * Build a tree and sequence of test events from file
- *
- * Deprecated and should be removed soon, use branched_from_file instead
- */
- [[deprecated("Use branched_from_file instead")]]
-Tree from_file(std::string file_name,
-                size_t dimension,
-                char delimiter,
-                std::string label_true_value,
-                std::vector<size_t> add_indices, std::vector<size_t> del_indices, std::vector<size_t> eval_indices,
-                std::vector<tree_event> &event_vector,
-				bool skip_first_line,
-				float epsilon,
-				unsigned int max_height,
-				unsigned int min_split_points,
-				float min_split_gini,
-				float epsilon_transmission)
-{
-    size_t label_position;
-    std::multiset<Point*> tree_points;
-    auto it_add = add_indices.begin();
-    auto it_del = del_indices.begin();
-    auto it_eval = eval_indices.begin();
-    std::fstream data_file(file_name);
-    std::string current_line;
-	std::vector<FeatureType> features_types;
-
-    if (data_file.is_open()) {
-		if(skip_first_line)
-            getline(data_file, current_line);
-
-        dimension = read_header(data_file, delimiter, label_position, features_types);
-
-		std::vector<float> next_classification_id(dimension+1, 0.0);
-		std::vector<std::map<std::string, float>> class_txt_to_index(dimension+1, std::map<std::string, float>());
-
-        for(size_t i = 0; getline(data_file, current_line); i++)
-        {
-			Point current_point = point_from_line(current_line, delimiter, dimension, label_position, features_types, label_true_value, class_txt_to_index, next_classification_id);
-            size_t val_it_add = it_add == add_indices.end() ? UINTMAX_MAX : *it_add;
-            size_t val_it_del = it_del == del_indices.end() ? UINTMAX_MAX : *it_del;
-            size_t val_it_eval = it_eval == eval_indices.end() ? UINTMAX_MAX : *it_eval;
-            if(i == val_it_del || (i != val_it_add && i != val_it_eval))
-			{
-                Point* new_point = new Point(current_point);
-                tree_points.insert(new_point);
-			}
-			if(i == val_it_del)
-			{
-				tree_event new_event(Point(current_point), event_type::DEL);
-				event_vector.push_back(new_event);
-				it_del++;
-			}
-			if(i == val_it_eval)
-			{
-				tree_event new_event(Point(current_point), event_type::EVAL);
-				event_vector.push_back(new_event);
-				it_eval++;
-			}
-            if(i == val_it_add)
-            {
-				tree_event new_event(Point(current_point), event_type::ADD);
-				event_vector.push_back(new_event);
-				it_add++;
-            }
-        }
-    }
-    else
-        throw std::runtime_error("Error when oppening the data file");
-    data_file.close();
-    return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
-}
-
 /// Main function, see help (run program with argument '--help')
 int main(int argc, char *argv[])
 {
-	/*float value[DIMENSION] = {1.0, 0.0, 0.0};
-	Point* test_point = new Point(DIMENSION, value, true);
-    std::cout << test_point->get_dimension() << test_point->get_value() << test_point->get_feature(2) << (*test_point)[0] << std::endl;
-    value[1] = 1.0; value[2] = 1.0;
-    Point* test_second = new Point(DIMENSION, value, true);
-    value[0] = 0.0;
-    Point* test_third = new Point(DIMENSION, value, false);
-
-    std::multiset<Point*> list_of_points;
-    list_of_points.insert(test_point);
-    list_of_points.insert(test_second);
-    list_of_points.insert(test_third);
-    PointSet* test_pointset = new PointSet(list_of_points, DIMENSION);
-    std::cout << test_pointset->get_gini() << std::endl;
-    std::cout << test_pointset->get_best_gain() << std::endl;
-    auto test_splited = test_pointset->split_at_best();
-    std::cout<< test_splited[0]->get_gini() << " " << test_splited[1]->get_gini()  << std::endl;
-
-    Vertex root(test_pointset, NULL, 5, EPSILON, true);
-
-    value[1] = 0.0; value[2] = 0.0;
-    Point challenge_point(DIMENSION, value, false);
-    std::cout << root.decision(value) << std::endl;
-
-	Tree test_tree(list_of_points, DIMENSION, MAX_HEIGHT, EPSILON);
-	std::cout << test_tree.decision(value) << std::endl;
-
-	test_tree.add_point(value, true);
-    std::cout << test_tree.decision(value) << std::endl;
-
-	test_tree.delete_point(value, true);
-    std::cout << test_tree.decision(value) << std::endl;
-
-    delete test_splited[0];
-    test_splited[0] = NULL;
-    delete test_splited[1];
-    test_splited[1] = NULL;
-    Point bla("1;2;3;4", 3, ';', 0, 1);*/
-
 	std::vector<param_setting> settings {
 		param_setting(true,
 			true,
@@ -847,13 +731,6 @@ int main(int argc, char *argv[])
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
-    /*Tree tree_from_file = from_file(file_name,
-                dimension,
-                delimiter,
-                label_position,
-                label_true_value,
-                std::vector<size_t> {101, 102, 103, 104, 105}, std::vector<size_t> {1004, 1005, 1006, 1007, 1008}, std::vector<size_t> {105, 110, 111, 112, 253}, event_vector, skip_first_line, epsilon, max_height);
-*/
 
 	Tree reference_tree = branched_from_file(file_name,
                 delimiter,
