@@ -5,10 +5,19 @@
 #ifndef PARAMPARSER_H_INCLUDED
 #define PARAMPARSER_H_INCLUDED
 
+/**
+ * Number of char spaces between beginning of name and "mandatory" column
+ *
+ * The sizes of names should be under SEPARATING_NAMES_MANDATORY - 1 to avoid
+ * ugly printing
+ */
 #define SEPARATING_NAMES_MANDATORY 30
+/// Number of spaces kept for the "mandatory" column
 #define SEPARATING_MANDATORY_DESC 12
 
+/// Value that will be given to boolean argument when it is considered True
 #define BOOLEAN_TRUE_VALUE "1"
+/// Value that will be given to boolean argument when it is considered False
 #define BOOLEAN_FALSE_VALUE "0"
 
 #include <vector>

@@ -216,7 +216,6 @@ class Vertex {
 		 * @param source Root vertex from which to copy
 		 * @param epsilon New epsilon value for the tree
 		 * @param new_points Copy of the previous points, owned by the new tree
-		 * @todo Decide if this is too misleading to be kept
 		 */
 		Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
 
