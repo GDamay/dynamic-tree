@@ -153,7 +153,7 @@ size_t find(char *argv[], size_t begin, size_t size, std::string searched_obj)
  *  positional parameters, and then the non-positional parameters.
  * @param argc Size of the argv list
  * @param argv List of arguments, splitted by words
- * @param parsed_param In/Out dict of which values corresponding to keys that
+ * @param parsed_params In/Out dict of which values corresponding to keys that
  *  are the return_name of the parameters will be set to the value of the
  *  related parameter
  * @return True if the '--help' argument is found, and hence the help is
