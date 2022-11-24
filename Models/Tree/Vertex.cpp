@@ -43,7 +43,7 @@ Vertex::Vertex(const Vertex& source, Vertex* parent, PointSet* pointset) :
 	}
 }
 
-/*Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points) :
+Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points) :
 	is_leaf(source.is_leaf),
 	is_root(source.is_root),
 	split_parameter(source.split_parameter),
@@ -65,7 +65,7 @@ Vertex::Vertex(const Vertex& source, Vertex* parent, PointSet* pointset) :
 		this->under_child = new Vertex(*source.under_child, this, new PointSet(*source.under_child->pointset, subsets[0]));
 		this->over_child = new Vertex(*source.over_child, this, new PointSet(*source.over_child->pointset, subsets[1]));
 	}
-}*/
+}
 
 Vertex::~Vertex()
 {

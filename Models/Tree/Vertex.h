@@ -199,10 +199,25 @@ class Vertex {
 		 *
 		 * @warning This seems to be both wrong and unused, and hence could be
 		 *	remove without any warning in a future version
+		 * @todo Remove this
 		 */
 		[[deprecated("This seems to be both wrong and unused, and hence could be remove without any warning in a future version")]]
 		Vertex(const Vertex& source, Vertex* parent, PointSet* pointset);
-		//Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
+
+		/**
+		 * Build new root vertex by copying the provided one
+		 *
+		 * All the data but epsilon and the points are copied from source. The
+		 * new points are expected to be a copy of those in source. This
+		 * This function is used when making several tests, to avoid expensive
+		 * Tree creation
+		 *
+		 * @param source Root vertex from which to copy
+		 * @param epsilon New epsilon value for the tree
+		 * @param new_points Copy of the previous points, owned by the new tree
+		 * @todo Decide if this is too misleading to be kept
+		 */
+		Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
 
 		/**
 		 * Destructor of Vertex
