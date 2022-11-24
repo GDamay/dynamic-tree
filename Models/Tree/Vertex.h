@@ -146,6 +146,24 @@ class Vertex {
 
 		static unsigned int nb_build;
 
+		/**
+		 * Enhanced copy constuctor of Vertex
+		 *
+		 * Copy the parameters of source except its parent and pointset, which
+		 * are provided separately. The epsilon and epsilon_transmission are
+		 * copied from parent.
+		 * 
+		 * This function is meant to avoid recomputing the inital tree when
+		 * making several tests
+		 *
+		 * @param source The vertex from which data should be copied
+		 * @param parent The parent vertex of the new vertex
+		 * @param pointset The pointset of the new vertex
+		 *
+		 * @warning This is highly misleading, which is why it is private
+		 */
+		Vertex(const Vertex& source, Vertex* parent, PointSet* pointset);
+
 	public:
 		/**
 		 * Main constructor of Vertex
@@ -186,23 +204,6 @@ class Vertex {
 		 * 	of @p parent
 		 */
 		Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, float epsilon, unsigned int min_split_points, float min_split_gini, float epsilon_transmission, bool is_root = false);
-
-		/**
-		 * Enhanced copy constuctor of Vertex
-		 *
-		 * Copy the parameters of source except its parent and pointset, which
-		 * are provided separately
-		 *
-		 * @param source The vertex from which data should be copied
-		 * @param parent The parent vertex of the new vertex
-		 * @param pointset The pointset of the new vertex
-		 *
-		 * @warning This seems to be both wrong and unused, and hence could be
-		 *	remove without any warning in a future version
-		 * @todo Remove this
-		 */
-		[[deprecated("This seems to be both wrong and unused, and hence could be remove without any warning in a future version")]]
-		Vertex(const Vertex& source, Vertex* parent, PointSet* pointset);
 
 		/**
 		 * Build new root vertex by copying the provided one

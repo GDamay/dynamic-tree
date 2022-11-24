@@ -31,7 +31,7 @@ Vertex::Vertex(const Vertex& source, Vertex* parent, PointSet* pointset) :
 	pointset(pointset),
 	min_split_points(source.min_split_points),
 	min_split_gini(source.min_split_gini),
-	epsilon_transmission(source.epsilon_transmission),
+	epsilon_transmission(parent->epsilon_transmission),
 	under_child(NULL),
 	over_child(NULL)
 {
@@ -55,7 +55,7 @@ Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_po
 	pointset(new PointSet(*source.pointset, new_points)),
 	min_split_points(source.min_split_points),
 	min_split_gini(source.min_split_gini),
-	epsilon_transmission(source.epsilon_transmission),
+	epsilon_transmission(epsilon),
 	under_child(NULL),
 	over_child(NULL)
 {
