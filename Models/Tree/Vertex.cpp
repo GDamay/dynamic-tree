@@ -108,6 +108,8 @@ void Vertex::build()
 unsigned int Vertex::add_point(Point* new_point)
 {
 	this->pointset->add_point(new_point);
+	/// @todo put the decision making part in a separate function to make it common to both update operations
+	/// @todo in some cases we should rebuild even if this is a leaf (check constistancy with article)
 	if(!this->is_leaf)
 	{
 		this->updates_since_last_build++;

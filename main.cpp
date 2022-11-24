@@ -1,3 +1,9 @@
+/**
+ * @file main.cpp
+ * Run the dynamic_tree program to test its performances
+ *
+ * @todo When available, add link to the article in README and in Doxyfile
+ */
 #include "param_parser.h"
 #include <sstream>
 #include <iostream>
@@ -21,26 +27,89 @@
 //constexpr auto MAX_HEIGHT = 5;
 using namespace std;
 
-enum class algo_type{SLIDING, RANDOM};
-
-enum class event_type{ADD, DEL, EVAL};
-struct tree_event{
-		Point  event_point;
-		event_type tree_event_type;
-		tree_event( Point  event_point, event_type tree_event_type) : event_point(event_point), tree_event_type(tree_event_type)
-		{};
+/// Represents the type of test to run
+enum class algo_type{
+	/** 
+	 * Kind of tests in which the data are considered sequetially
+	 *
+	 * The data in the tree will then correspond to a sliding window over the
+	 * input file data. At each step, the next point in the file is added and
+	 * the oldest point is removed.
+	 */
+	SLIDING,
+	/**
+	 * Kind of test in which the data are considered random
+	 * 
+	 * The data in the tree will correspond to a random selection of the points
+	 * of the input file. At each step, a new random point not used so far is
+	 * added or a random point of the file is removed.
+	 */
+	RANDOM
 };
 
+/// Represents the usage to make of a point at a step
+enum class event_type{
+	/// Add the point to the tree
+	ADD,
+	/// Delete the point from the tree
+	DEL,
+	/// Use the point to evaluate if the tree gives the right answer
+	EVAL};
+
+/**
+ * A step of the test loop
+ *
+ * Use a point to change or evaluate the tree
+ */
+struct tree_event{
+	/// Point to use
+	Point  event_point;
+	/// Action to do with the point
+	event_type tree_event_type;
+	/**
+	 * Constructor of tree_event
+	 *
+	 * @param event_point Point to use
+	 * @param tree_event_type Action to do with the point
+	 */
+	tree_event( Point  event_point, event_type tree_event_type) : event_point(event_point), tree_event_type(tree_event_type)
+	{};
+};
+
+/// Data defining the performance of the tree during a test sequence
 struct test_result {
+	/// Number of event_type.EVAL points rightly classified as True
 	unsigned int true_positive = 0;
+	/// Number of event_type.EVAL points rightly classified as False
 	unsigned int true_negative = 0;
+	/// Number of event_type.EVAL points wrongly classified as True
 	unsigned int false_positive = 0;
+	/// Number of event_type.EVAL points wrongly classified as False
 	unsigned int false_negative = 0;
+	/**
+	 * Sum of training error (number points of the graph in a leaf that would
+	 * have classified them wrongly) at each evaluation step
+	 */
 	unsigned long total_training_error = 0;
 };
 
-// Returns dimension and set label_position and features_types
-// data_file will be a line after
+/**
+ * Read the header line of file, containing types of features and label position
+ *
+ * See the help of the program for more informations
+ *
+ * @param data_file In/out argument. Already-opened file reader from which the
+ *  line will be red. The reader should be positioned at the beginning of the
+ *  header line, and the fonction will leave it at the beginning of the
+ *  following line
+ * @param delimiter Char separating the items of the line
+ * @param label_position Out argument, will be set to the position of the
+ *  label in each line (first position is 0)
+ * @param features_types In/out argument, the vector should be initialized but
+ *  empty, and it will contain the ordered list of types of the features. If it
+ *  is not empty, the list will be added after its last element
+ * @return The number of features (dimension of the points)
+ */
 size_t read_header(std::fstream &data_file, char delimiter, size_t &label_position, std::vector<FeatureType> &features_types)
 {
 	size_t dimension;
@@ -79,6 +148,32 @@ size_t read_header(std::fstream &data_file, char delimiter, size_t &label_positi
 	return dimension - 1;
 }
 
+/**
+ * Parse current_line to a Point
+ *
+ * current_line should be formatted as a line of the input file
+ *
+ * @param current_line Line to parse
+ * @param delimiter Char separating the different elements in the line
+ * @param dimension Expected number of features (excluding the label) in the
+ *  line
+ * @param label_position The index of the position at which the label is
+ *  expected to be found (first position is index 0)
+ * @param features_types Ordered list of the features (excluding the label)
+ * @param label_true_value String that the label should be equal to in the line
+ *  to be counted as "True"
+ * @param class_txt_to_index In/out argument, vector of dict containing, for
+ *  each feature and when this feature is not of type "REAL", the list of values
+ *  that have already been encountered for this feature and the index of the
+ *  classes that are attributed . It will be updated if new values are
+ *  encountered. It should at least be initialised with an empty map for each
+ *  feature.
+ * @param next_classification_id In/out argument, for each feature the value is
+ *  the class that should be associated with a new value that would be
+ *  encountered. If not used so far, it should be initialised with 0 for each
+ *  feature.
+ * @return The point of which features and labels are parsed from the line
+ */
 Point point_from_line(std::string current_line,
 									char delimiter,
 									size_t dimension,
@@ -129,6 +224,13 @@ Point point_from_line(std::string current_line,
 	return to_return;
 }
 
+/**
+ * Run the test steps of event_vector
+ *
+ * @param event_vector Ordered list of events to perform
+ * @param tree_to_update Tree on which performing the events
+ * @return Data of the EVAL events
+ */
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
 {
 	test_result result;
@@ -157,6 +259,41 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
 	return result;
 }
 
+/**
+ * Create a random test sequence from the data of the file
+ *
+ * @param file_name Path to the input file (absolute or relative)
+ * @param label_true_value Value for which, when label is equal to it, the label
+ *  will be considered equal to True
+ * @param delimiter Char separating the different elements of a same line
+ * @param initial_size Number of points to include in the original tree, before
+ *  performing any event
+ * @param eval_proba For each event of type ADD or DEL, probability of
+ *  performing an EVAL event before (if the event is ADD, the EVAL will be made
+ *  using the point to add)
+ * @param number_of_updates Number of events of type update (ADD or DEL) to
+ *  perform (could be lowered if there are no points left)
+ * @param insert_probability Probability of an update event (ADD or DEL) to be
+ *  ADD. If this is > 0.5, the expected size of the tree will grow, and if it is
+ *  < 0.5, the expected size will shrink
+ * @param seed The seed to use for the random operations
+ * @param event_vector Out argument, vector of the events. It is expected to be
+ *  empty, if it is not the events will be added at the end.
+ * @param skip_first_line If true, the first line of the file will be considered
+ *  irrelevant and skipped (for exemple, labels of features)
+ * @param epsilon The epsilon value to use (see paper)
+ * @param max_height The maximum size the tree should be able to reach (at init
+ *  and during updated) (see paper, parameter h)
+ * @param min_split_points Minimal number of points a node of the tree should
+ *  contain to not be a leaf (at init and during updates) (see paper, parameter 
+ *  k)
+ * @param min_split_gini Minimal gini value a node of the tree should have to
+ *  not be a leaf (at init and during updates) (see paper, parameter alpha)
+ * @param epsilon_transmission Epsilon value to use when searching which parent
+ *  node to recompute (line 11 of the algorithm 1). It is usually equal to
+ *  epsilon but could be changed for tests.
+ * @return The inital tree on which to perform the events
+ */
 Tree random_from_file(std::string file_name,
 				std::string label_true_value,
 				char delimiter,
@@ -239,6 +376,36 @@ Tree random_from_file(std::string file_name,
     return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
+/**
+ * Create a sliding window test sequence from the data of the file
+ *
+ * @param file_name Path to the input file (absolute or relative)
+ * @param label_true_value Value for which, when label is equal to it, the label
+ *  will be considered equal to True
+ * @param delimiter Char separating the different elements of a same line
+ * @param window_size Number of points to include in the original tree, and that
+ *  will be in the tree after each sequence of DEL and ADD
+ * @param eval_proba For each sequence of DEL and ADD, probability of
+ *  performing an EVAL event before (the EVAL will be made using the point to
+ *  add)
+ * @param seed The seed to use for the random operations
+ * @param event_vector Out argument, vector of the events. It is expected to be
+ *  empty, if it is not the events will be added at the end.
+ * @param skip_first_line If true, the first line of the file will be considered
+ *  irrelevant and skipped (for exemple, labels of features)
+ * @param epsilon The epsilon value to use (see paper)
+ * @param max_height The maximum size the tree should be able to reach (at init
+ *  and during updated) (see paper, parameter h)
+ * @param min_split_points Minimal number of points a node of the tree should
+ *  contain to not be a leaf (at init and during updates) (see paper, parameter 
+ *  k)
+ * @param min_split_gini Minimal gini value a node of the tree should have to
+ *  not be a leaf (at init and during updates) (see paper, parameter alpha)
+ * @param epsilon_transmission Epsilon value to use when searching which parent
+ *  node to recompute (line 11 of the algorithm 1). It is usually equal to
+ *  epsilon but could be changed for tests.
+ * @return The inital tree on which to perform the events
+ */
 Tree window_from_file(std::string file_name,
 				std::string label_true_value,
                 char delimiter,
@@ -300,7 +467,47 @@ Tree window_from_file(std::string file_name,
     return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
-// Needed for not having to make generic constructor for Tree
+/**
+ * Create a sliding window test sequence from the data of the file
+ *
+ * This is needed for not having to make generic constructor for Tree
+ *
+ * @param file_name Path to the input file (absolute or relative)
+ * @param label_true_value Value for which, when label is equal to it, the label
+ *  will be considered equal to True
+ * @param delimiter Char separating the different elements of a same line
+ * @param dataset_size Number of points to include in the original tree, and in
+ *  the case of the sliding window experiment, it will be the number of points
+ *  in the tree after each sequence of DEL and ADD
+ * @param eval_proba For each sequence of DEL and ADD (case of sliding window), 
+ *  or each update event (case of random test), probability of performing an 
+ *  EVAL event before (the EVAL will be made using the point to add)
+ * @param number_of_updates Number of events of type update (ADD or DEL) to
+ *  perform (could be lowered if there are no points left). Relevant only for
+ *  tests of the random kind.
+ * @param insert_probability Probability of an update event (ADD or DEL) to be
+ *  ADD. If this is > 0.5, the expected size of the tree will grow, and if it is
+ *  < 0.5, the expected size will shrink. Relevent only for tests of the random
+ *  kind.
+ * @param seed The seed to use for the random operations
+ * @param event_vector Out argument, vector of the events. It is expected to be
+ *  empty, if it is not the events will be added at the end.
+ * @param skip_first_line If true, the first line of the file will be considered
+ *  irrelevant and skipped (for exemple, labels of features)
+ * @param epsilon The epsilon value to use (see paper)
+ * @param max_height The maximum size the tree should be able to reach (at init
+ *  and during updated) (see paper, parameter h)
+ * @param type_of_building Define type of test to generate (SLIDING or RANDOM)
+ * @param min_split_points Minimal number of points a node of the tree should
+ *  contain to not be a leaf (at init and during updates) (see paper, parameter 
+ *  k)
+ * @param min_split_gini Minimal gini value a node of the tree should have to
+ *  not be a leaf (at init and during updates) (see paper, parameter alpha)
+ * @param epsilon_transmission Epsilon value to use when searching which parent
+ *  node to recompute (line 11 of the algorithm 1). It is usually equal to
+ *  epsilon but could be changed for tests.
+ * @return The inital tree on which to perform the events
+ */
 Tree branched_from_file(std::string file_name,
 	char delimiter,
 	std::string label_true_value,
@@ -348,6 +555,12 @@ Tree branched_from_file(std::string file_name,
 			epsilon_transmission);
 }
 
+/**
+ * Build a tree and sequence of test events from file
+ *
+ * Deprecated and should be removed soon, use branched_from_file instead
+ */
+ [[deprecated("Use branched_from_file instead")]]
 Tree from_file(std::string file_name,
                 size_t dimension,
                 char delimiter,
@@ -416,6 +629,7 @@ Tree from_file(std::string file_name,
     return Tree(tree_points, dimension, max_height, epsilon, min_split_points, min_split_gini, epsilon_transmission, features_types);
 }
 
+/// Main function, see help (run program with argument '--help')
 int main(int argc, char *argv[])
 {
 	/*float value[DIMENSION] = {1.0, 0.0, 0.0};

@@ -276,7 +276,7 @@ void PointSet::add_point(Point* new_point)
 	this->is_gain_calculated = false;
 }
 
-// TODO : Raise exception if no point or multiple points erased and update documentation accordingly
+/// @todo Raise exception if no point or multiple points erased and update documentation accordingly
 void PointSet::delete_point(Point* old_point)
 {
 	this->points.erase(old_point);

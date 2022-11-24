@@ -1,4 +1,7 @@
-/// @file Implementation of the Vertex class
+/**
+ * @file Vertex.h
+ * Implementation of class Vertex
+ */
 #ifndef VERTEX_H_INCLUDED
 #define VERTEX_H_INCLUDED
 
@@ -11,7 +14,7 @@
  *
  * This is meant for evaluating performance of the algoritm
  */
-extern unsigned int nb_build; // TODO: Solve problem of documenting external
+extern unsigned int nb_build; 
 
 /**
  * A Vertex of the tree

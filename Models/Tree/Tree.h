@@ -1,4 +1,7 @@
-//Define the ground tree class, owning the points
+/**
+ * @file Tree.h
+ * Definition of class Tree
+ */
 #ifndef TREE_H_INCLUDED
 #define TREE_H_INCLUDED
 

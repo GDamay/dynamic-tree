@@ -1,3 +1,7 @@
+/**
+ * @file Point.h
+ * Definition of class Point
+ */
 #ifndef POINT_H_INCLUDED
 #define POINT_H_INCLUDED
 

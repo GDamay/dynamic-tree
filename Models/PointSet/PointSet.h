@@ -1,3 +1,7 @@
+/**
+ * @file PointSet.h
+ * Definition of class PointSet
+ */
 #ifndef POINTSET_H_INCLUDED
 #define POINTSET_H_INCLUDED
 
@@ -8,10 +12,13 @@
 
 /// Possible types of features.
 enum class FeatureType {
-	BINARY, //< Binary feature, can be 0 or 1.
-	CLASSIFIED, //< Categorized feature, discrete and without logical order.
-	REAL //< Real feature, (almost) continuous and logically ordered.
-}; //TODO : Solve problem preventing it to be in documentation
+	/// Binary feature, can be 0 or 1.
+	BINARY,
+	/// Categorized feature, discrete and without logical order.
+	CLASSIFIED,
+	/// Real feature, (almost) continuous and logically ordered.
+	REAL
+};
 
 /**
  * A subset of the dataset.\ Contains a collection of Points.
