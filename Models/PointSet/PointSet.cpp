@@ -3,6 +3,7 @@
 #include <cstring>
 #include <algorithm> // std::sort
 #include <map>
+#include <stdexcept>
 
 PointSet::PointSet(std::multiset<Point*> points, size_t dimension, std::vector<FeatureType> features_types, std::vector<bool> is_feature_relevent) : 
 		points(points),
@@ -276,10 +277,10 @@ void PointSet::add_point(Point* new_point)
 	this->is_gain_calculated = false;
 }
 
-/// @todo Raise exception if no point or multiple points erased and update documentation accordingly
 void PointSet::delete_point(Point* old_point)
 {
-	this->points.erase(old_point);
+	if(this->points.erase(old_point)!=1)
+		throw std::runtime_error("Error : Point not found or found multiple time (should not append, implementation error)");
 	if(this->is_positive_proportion_calculated)
 	{
 		this->positive_counter -= old_point->get_value();

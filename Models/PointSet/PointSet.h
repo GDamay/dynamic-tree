@@ -295,10 +295,8 @@ class PointSet {
 		 * 
 		 * @note This will update positive_proportion and toggle variable
 		 * 	indicating that gini and gain have to be recalculated
-		 * @warning The pointer should point to a point belonging in the 
-		 *  PointSet. Providing pointer to a point that does not belong in the 
-		 *  PointSet would result in unexpected behaviour so far, and will raise
-		 * 	exception in a later version
+		 * @throw std::runtime_error When the point does not belong in the 
+		 * 	pointset
 		 */
 		void delete_point(Point* old_point);
 
