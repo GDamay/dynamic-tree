@@ -14,7 +14,8 @@ Vertex::Vertex(PointSet* pointset, Vertex* parent, unsigned int remaining_high, 
 	min_split_gini(min_split_gini),
 	epsilon_transmission(epsilon_transmission),
 	under_child(NULL),
-	over_child(NULL)
+	over_child(NULL),
+	size_at_building(0)
 {
 	this->build();
 }
@@ -33,7 +34,8 @@ Vertex::Vertex(const Vertex& source, Vertex* parent, PointSet* pointset) :
 	min_split_gini(source.min_split_gini),
 	epsilon_transmission(parent->epsilon_transmission),
 	under_child(NULL),
-	over_child(NULL)
+	over_child(NULL),
+	size_at_building(source.size_at_building)
 {
 	if(!this->is_leaf)
 	{
@@ -57,7 +59,8 @@ Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_po
 	min_split_gini(source.min_split_gini),
 	epsilon_transmission(epsilon),
 	under_child(NULL),
-	over_child(NULL)
+	over_child(NULL),
+	size_at_building(source.size_at_building)
 {
 	if(!this->is_leaf)
 	{
@@ -82,6 +85,7 @@ Vertex::~Vertex()
 void Vertex::build()
 {
 	Vertex::nb_build++;
+	this->size_at_building=this->pointset->get_size();
 	// If this has already been built, free memory of children
 	if(this->under_child != NULL)
 	{
@@ -114,14 +118,14 @@ unsigned int Vertex::add_point(Point* new_point)
 	if(!this->is_leaf)
 	{
 		this->updates_since_last_build++;
-		if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
+		if(this->updates_since_last_build >= epsilon*this->size_at_building)
 		{
 			if(this->is_root) // If is root, parent can not call rebuild
 				this->build();
 
 			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
 			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-			return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon_transmission))) + 0.5);
+			return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->size_at_building)/log(1.0+epsilon_transmission))) + 0.5);
 		}
 		else
 		{
@@ -131,7 +135,7 @@ unsigned int Vertex::add_point(Point* new_point)
 			else
 				to_update = (*new_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 			unsigned int threshold = to_update->add_point(new_point);
-			if(threshold > 0 && this->pointset->get_size() < threshold)
+			if(threshold > 0 && this->size_at_building < threshold)
 				if(this->is_root)
 					this->build();
 				else
@@ -151,15 +155,14 @@ unsigned int Vertex::delete_point(Point* old_point)
 {
 	this->pointset->delete_point(old_point);
 	this->updates_since_last_build++;
-	/// @todo Change to comply with the article (init size, not current)
-	if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
+	if(this->updates_since_last_build >= epsilon*this->size_at_building)
 	{
 		if(this->is_root)
 			this->build();
 
 		// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
 		// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-		return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->pointset->get_size())/log(1.0+epsilon_transmission))) + 0.5);
+		return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->size_at_building)/log(1.0+epsilon_transmission))) + 0.5);
 	}
 	else if(!this->is_leaf)
 	{
@@ -169,8 +172,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 		else
 			to_update = (*old_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 		unsigned int threshold = to_update->delete_point(old_point);
-		/// @todo Change to comply with the article (leq and init size)
-		if(threshold > 0 && this->pointset->get_size() < threshold)
+		if(threshold > 0 && this->size_at_building < threshold)
 			if(this->is_root)
 				this->build();
 			else

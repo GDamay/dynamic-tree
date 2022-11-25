@@ -82,6 +82,9 @@ class Vertex {
 		 */
 		unsigned int updates_since_last_build;
 
+		/// Size of the pointset on last build. Used for choosing when to rebuild
+		unsigned int size_at_building;
+
 		/**
 		 * Parameter of the algorithm, used for deciding when to rebuild
 		 *
