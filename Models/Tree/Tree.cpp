@@ -68,17 +68,17 @@ void Tree::add_point(Point to_add)
 void Tree::delete_point(const float* features, bool value)
 {
 	Point pattern_to_delete(this->dimension, features, value);
-	auto it_to_delete = this->list_of_points.find(&pattern_to_delete);
+	this->delete_point(pattern_to_delete);
+}
+
+void Tree::delete_point(Point to_delete)
+{
+	auto it_to_delete = this->list_of_points.find(&to_delete);
 	if(it_to_delete == this->list_of_points.end())
 		throw std::runtime_error("Error : Point does not exists");
 	this->root->delete_point(*it_to_delete);
 	delete *it_to_delete;
 	this->list_of_points.erase(it_to_delete);
-}
-
-void Tree::delete_point(Point to_delete)
-{
-	this->delete_point(to_delete.get_features(), to_delete.get_value());
 }
 		
 bool Tree::decision(const float* features)
