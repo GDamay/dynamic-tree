@@ -256,7 +256,7 @@ class PointSet {
 		 * feature/threshold. However if it has already been calculated and
 		 * don't need refresh, it will not be recalculated
 		 * 
-		 * @note Contrary to {@link #best_gain best_gain} property of this
+		 * @note Contrary to attribute @p best_gain of this
 		 * 	object, the return value is not a proxy but the exact best gain
 		 */
 		double get_best_gain();
