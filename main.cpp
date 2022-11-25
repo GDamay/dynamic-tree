@@ -589,10 +589,17 @@ int main(int argc, char *argv[])
 			true),
 		param_setting(false,
 			false,
+			"max_gain_error",
+			"-M",
+			"--beta",
+			"Max distance between the actual and the best split gain of the node if epsilon is calculated automatically",
+			"1"),
+		param_setting(false,
+			false,
 			"epsilon",
 			"-e",
 			"--epsilon",
-			"Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(min_split_gini/6, 1/(min_split_points+2))",
+			"Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(max_gain_error/13, min_split_gini/6, 1/(min_split_points+2))",
 			"-1"),
 		param_setting(false,
 			false,
@@ -726,8 +733,9 @@ int main(int argc, char *argv[])
 	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;
 	unsigned int min_split_points = (unsigned int)std::stoul(parsed_params["min_split_points"]);
 	float min_split_gini = std::stof(parsed_params["min_split_gini"]);
+	float max_gain_error = std::stof(parsed_params["max_gain_error"]);
 	float epsilon_step = std::stof(parsed_params["epsilon_step"]);
-	float epsilon = parsed_params["epsilon"] == "-1" ? std::min(min_split_gini/6,  float(1)/(min_split_points + 2)) : std::stof(parsed_params["epsilon"]);
+	float epsilon = parsed_params["epsilon"] == "-1" ? std::min(std::min(max_gain_error/13, min_split_gini/6),  float(1)/(min_split_points + 2)) : std::stof(parsed_params["epsilon"]);
 	float epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_transmission"]);
 	float epsilon_max = parsed_params["epsilon_max"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_max"]);
     std::vector<tree_event> event_vector;
