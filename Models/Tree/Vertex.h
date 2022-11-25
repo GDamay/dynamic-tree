@@ -112,8 +112,7 @@ class Vertex {
 		 * epsilon for the second purpose.
 		 *
 		 * @note In most of the cases, this is expected to be equal to
-		 *	Vertex#epsilon, although the implementation is able to
-		 * 	deal with a different value.
+		 *		1, although the implementation is able to handle different value
 		 */
 		float epsilon_transmission;
 
@@ -197,7 +196,7 @@ class Vertex {
 		 * 	more details). This parameter allow to have a different value of
 		 * 	epsilon for the second purpose.
 		 * 	In most of the cases, this is expected to be equal to
-		 *	@p epsilon, although the implementation is able to deal with a 
+		 *		1, although the implementation is able to deal with a 
 		 * 	different value.
 		 * @param is_root Indicates whether this vertex is the root (top vertex)
 		 * 	of the tree
@@ -218,9 +217,10 @@ class Vertex {
 		 *
 		 * @param source Root vertex from which to copy
 		 * @param epsilon New epsilon value for the tree
+		 * @param epsilon_transmission New epsilon_transmission value
 		 * @param new_points Copy of the previous points, owned by the new tree
 		 */
-		Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points);
+		Vertex(const Vertex& source, float epsilon, float epsilon_transmission, std::multiset<Point*> new_points);
 
 		/**
 		 * Destructor of Vertex

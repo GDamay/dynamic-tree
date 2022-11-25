@@ -45,7 +45,7 @@ Vertex::Vertex(const Vertex& source, Vertex* parent, PointSet* pointset) :
 	}
 }
 
-Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_points) :
+Vertex::Vertex(const Vertex& source, float epsilon, float epsilon_transmission, std::multiset<Point*> new_points) :
 	is_leaf(source.is_leaf),
 	is_root(source.is_root),
 	split_parameter(source.split_parameter),
@@ -57,7 +57,7 @@ Vertex::Vertex(const Vertex& source, float epsilon, std::multiset<Point*> new_po
 	pointset(new PointSet(*source.pointset, new_points)),
 	min_split_points(source.min_split_points),
 	min_split_gini(source.min_split_gini),
-	epsilon_transmission(epsilon),
+	epsilon_transmission(epsilon_transmission),
 	under_child(NULL),
 	over_child(NULL),
 	size_at_building(source.size_at_building)
@@ -172,7 +172,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 		else
 			to_update = (*old_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 		unsigned int threshold = to_update->delete_point(old_point);
-		if(threshold > 0 && this->size_at_building < threshold)
+		if(threshold > 0 && this->size_at_building <= threshold)
 			if(this->is_root)
 				this->build();
 			else

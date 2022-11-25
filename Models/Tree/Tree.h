@@ -67,8 +67,7 @@ class Tree {
 		 * epsilon for the second purpose.
 		 *
 		 * @note In most of the cases, this is expected to be equal to
-		 *	Tree#epsilon, although the implementation is able to
-		 * 	deal with a different value.
+		 *		1, although the implementation is able to handle different value
 		 */
 		float epsilon_transmission;
 	public:
@@ -117,7 +116,6 @@ class Tree {
 		 * @param epsilon The new epsilon value
 		 * @param epsilon_transmission The new epsilon_transmission value
 		 * @see Tree#Tree(std::multiset<Point*>, size_t, unsigned int, float, unsigned int, float, float, std::vector<FeatureType>)
-		 * @bug The epsilon_transmission is not transmitted to the Vertices (epsilon is copied)
 		 * @todo Solve that problem
 		 */
 		Tree(const Tree& source, float epsilon, float epsilon_transmission);

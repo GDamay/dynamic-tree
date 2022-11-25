@@ -289,7 +289,7 @@ test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_
  *  not be a leaf (at init and during updates) (see paper, parameter alpha)
  * @param epsilon_transmission Epsilon value to use when searching which parent
  *  node to recompute (line 11 of the algorithm 1). It is usually equal to
- *  epsilon but could be changed for tests.
+ *  1 but could be changed for tests.
  * @return The inital tree on which to perform the events
  */
 Tree random_from_file(std::string file_name,
@@ -401,7 +401,7 @@ Tree random_from_file(std::string file_name,
  *  not be a leaf (at init and during updates) (see paper, parameter alpha)
  * @param epsilon_transmission Epsilon value to use when searching which parent
  *  node to recompute (line 11 of the algorithm 1). It is usually equal to
- *  epsilon but could be changed for tests.
+ *  1 but could be changed for tests.
  * @return The inital tree on which to perform the events
  */
 Tree window_from_file(std::string file_name,
@@ -503,7 +503,7 @@ Tree window_from_file(std::string file_name,
  *  not be a leaf (at init and during updates) (see paper, parameter alpha)
  * @param epsilon_transmission Epsilon value to use when searching which parent
  *  node to recompute (line 11 of the algorithm 1). It is usually equal to
- *  epsilon but could be changed for tests.
+ *  1 but could be changed for tests.
  * @return The inital tree on which to perform the events
  */
 Tree branched_from_file(std::string file_name,
@@ -671,7 +671,7 @@ int main(int argc, char *argv[])
 			"-w",
 			"--epsilon_transmission",
 			"Epsilon to apply when choosing which layer to recompute. If -1 : epsilon",
-			"-1"),
+			"1"),
 		param_setting(false,
 			false,
 			"epsilon_max",

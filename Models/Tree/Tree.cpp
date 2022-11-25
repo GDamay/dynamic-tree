@@ -30,7 +30,7 @@ Tree::Tree(const Tree& source, float epsilon, float epsilon_transmission) :
 		Point* new_point = new Point(**it);
 		this->list_of_points.insert(new_point);
 	}
-	this->root = new Vertex(*source.root, epsilon, std::multiset<Point*>(this->list_of_points.begin(), this->list_of_points.end()));
+	this->root = new Vertex(*source.root, epsilon, epsilon_transmission, std::multiset<Point*>(this->list_of_points.begin(), this->list_of_points.end()));
 }
 
 Tree::~Tree()
