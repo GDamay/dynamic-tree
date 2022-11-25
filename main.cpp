@@ -227,6 +227,7 @@ Point point_from_line(std::string current_line,
  * @param event_vector Ordered list of events to perform
  * @param tree_to_update Tree on which performing the events
  * @return Data of the EVAL events
+ * @todo Move this function as a method of Tree
  */
 test_result test_iterations(std::vector<tree_event> event_vector, Tree& tree_to_update)
 {
@@ -555,6 +556,7 @@ Tree branched_from_file(std::string file_name,
 /// Main function, see help (run program with argument '--help')
 int main(int argc, char *argv[])
 {
+	/// @todo Move arguments to a a dedicated config file
 	std::vector<param_setting> settings {
 		param_setting(true,
 			true,
