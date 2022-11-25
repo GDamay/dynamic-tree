@@ -116,7 +116,6 @@ class Tree {
 		 * @param epsilon The new epsilon value
 		 * @param epsilon_transmission The new epsilon_transmission value
 		 * @see Tree#Tree(std::multiset<Point*>, size_t, unsigned int, float, unsigned int, float, float, std::vector<FeatureType>)
-		 * @todo Solve that problem
 		 */
 		Tree(const Tree& source, float epsilon, float epsilon_transmission);
 
@@ -174,7 +173,7 @@ class Tree {
 		 * @param features Features of the point to delete. Those are only
 		 *	compared to the ones of the points, and hence no ownership is taken
 		 * @param value Decision value of the point to delete
-		 * @throw std::runtime_error When no point matching criteria has been
+		 * f When no point matching criteria has been
 		 *	found
 		 */
 		void delete_point(const float* features, bool value);
