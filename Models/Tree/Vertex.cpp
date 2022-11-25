@@ -114,38 +114,34 @@ unsigned int Vertex::add_point(Point* new_point)
 {
 	this->pointset->add_point(new_point);
 	/// @todo put the decision making part in a separate function to make it common to both update operations
-	/// @todo in some cases we should rebuild even if this is a leaf (check constistancy with article)
-	if(!this->is_leaf)
+	this->updates_since_last_build++;
+	if(this->updates_since_last_build >= epsilon*this->size_at_building)
 	{
-		this->updates_since_last_build++;
-		if(this->updates_since_last_build >= epsilon*this->size_at_building)
-		{
-			if(this->is_root) // If is root, parent can not call rebuild
-				this->build();
+		if(this->is_root) // If is root, parent can not call rebuild
+			this->build();
 
-			// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
-			// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
-			return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->size_at_building)/log(1.0+epsilon_transmission))) + 0.5);
-		}
+		// Casting will truncate. Since the theoritical result is an integer, the calculated result will be very close to an integer.
+		// The 0.5 added to the calculated result ensures that is it above the theoritical result and therefore equals to it after truncate
+		return (unsigned int)(pow(1.0+epsilon_transmission, ceil(log((double)this->size_at_building)/log(1.0+epsilon_transmission))) + 0.5);
+	}
+	else if(!this->is_leaf)
+	{
+		Vertex* to_update;
+		if (this->pointset->get_feature_type(split_parameter) == FeatureType::REAL)
+			to_update = (*new_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
+		else
+			to_update = (*new_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
+		unsigned int threshold = to_update->add_point(new_point);
+		if(threshold > 0 && this->size_at_building < threshold)
+			if(this->is_root)
+				this->build();
+			else
+				return threshold;
 		else
 		{
-			Vertex* to_update;
-			if (this->pointset->get_feature_type(split_parameter) == FeatureType::REAL)
-				to_update = (*new_point)[split_parameter] <= split_threshold ? this->under_child : this->over_child;
-			else
-				to_update = (*new_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
-			unsigned int threshold = to_update->add_point(new_point);
-			if(threshold > 0 && this->size_at_building < threshold)
-				if(this->is_root)
-					this->build();
-				else
-					return threshold;
-			else
-			{
-				if(threshold > 0)
-					to_update->build();
-				return 0;
-			}
+			if(threshold > 0)
+				to_update->build();
+			return 0;
 		}
 	}
 	return 0;
