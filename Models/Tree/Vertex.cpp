@@ -82,6 +82,7 @@ Vertex::~Vertex()
 void Vertex::build()
 {
 	Vertex::nb_build++;
+	// If this has already been built, free memory of children
 	if(this->under_child != NULL)
 	{
 		delete this->under_child;
@@ -150,6 +151,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 {
 	this->pointset->delete_point(old_point);
 	this->updates_since_last_build++;
+	/// @todo Change to comply with the article (init size, not current)
 	if(this->updates_since_last_build >= epsilon*this->pointset->get_size())
 	{
 		if(this->is_root)
@@ -167,6 +169,7 @@ unsigned int Vertex::delete_point(Point* old_point)
 		else
 			to_update = (*old_point)[split_parameter] == split_threshold ? this->over_child : this->under_child;
 		unsigned int threshold = to_update->delete_point(old_point);
+		/// @todo Change to comply with the article (leq and init size)
 		if(threshold > 0 && this->pointset->get_size() < threshold)
 			if(this->is_root)
 				this->build();
