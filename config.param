@@ -1,0 +1,35 @@
+This program runs the Dynamic Decision Tree algorithm (see [paper to be published]).
+The input file MUST be a csv featuring an header with as many columns as the rest of the file. Each column MUST contain a single character, 'l' if the column contains the decision label, 'n' if the column is numerical, 'b' if the column is binary and 'c' if it is categorial. The file MAY also feature a single line containing data irrelevant for the algorithm, in which case this line MUST be at the beginning of the file, before the header, and the '-s' argument MUST be provided.
+If the '-c' argument is provided, the output will be formatted as csv without header. If several runs are made using various values for epsilon, each run will correspond to a single output line. The csv columns will be 
+ - The seed used for the run
+ - The value of epsilon for this run
+ - The number of True Positive results of the tests
+ - The number of True Negative results of the tests
+ - The number of False Positive results of the tests
+ - The number of False Negative results of the tests
+ - The time (in ms) spent for initializing the tree
+ - The total time (in ms) spent for making all the iterations of this run
+ - The number of vertices (including leaves) that have been rebuild during the iterations
+ - The mean training error, evaluated along all iterations
+An header of the output csv could therefore be :
+seed;current_epsilon;true_positive;true_negative;false_positive;false_negative;init_time;iter_time;nb_build;mean_training_error
+
+file_name;true;true;;;Name of the file containing data;
+label_true_value;false;false;v;true_value;Value of the label that will be considered as true;1
+delimiter;false;false;d;delimiter;Character that separate data in the file;\;;
+skip_first_line;false;false;s;skip;Indicates that file has a header line before the one describing fields types;;true
+max_gain_error;false;false;M;beta;Max distance between the actual and the best split gain of the node if epsilon is calculated automatically;1
+epsilon;false;false;e;epsilon;Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(max_gain_error/13, min_split_gini/6, 1/(min_split_points+2));-1
+dataset_size;false;false;b;dataset_size;Size of the window in SLIDING test or of the initial dataset in RANDOM mode;3000
+eval_proba;false;false;a;proba;Probability of a point after the window to be evaluation point;0.01
+seed;false;false;r;seed;Seed for choosing evaluation points (if -1 : random);-1
+max_height;false;false;h;max_height;Max number of vertices between root and leaf (included);5
+test_type;false;false;t;type;Type of test to make, between 'S' or 'SLIDING' for sliding window, and 'R' or 'RANDOM' for random unordered sampling;S
+nb_updates;false;false;u;nb_updates;Number of updates (add and del) to include in RANDOM test;1000
+insert_proba;false;false;i;insert_proba;Probability of each event in RANDOM test to be an insertion;0.5
+is_output_csv;false;false;c;csv;Indicates that the ouput should be formatted as CSV;;true
+min_split_points;false;false;m;min_split_points;Minimal number of points in a vertex to make it have children;0
+min_split_gini;false;false;g;min_split_gini;Minimal gini value of the points set of a vertex to make it have children;0
+epsilon_transmission;false;false;w;epsilon_transmission;Epsilon to apply when choosing which layer to recompute. If -1 : epsilon;1
+epsilon_max;false;false;f;epsilon_max;For making several tests, set this to the max epsilon to test. If -1 : epsilon;-1
+epsilon_step;false;false;j;epsilon_step;For making several tests, set this to the step between epsilons to test;0.1

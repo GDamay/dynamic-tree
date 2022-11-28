@@ -20,12 +20,14 @@
 /// Value that will be given to boolean argument when it is considered False
 #define BOOLEAN_FALSE_VALUE "0"
 
+#include <fstream>
 #include <vector>
 #include <map>
 #include <math.h>
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 /// Handles the command-line parameters and convert them to usable string
 class ParametersParser {
@@ -201,8 +203,8 @@ class ParametersParser {
 			// ---- Print non-positional arguments ----
 			std::cout<<std::endl << "Options:" <<std::endl;
 			for(; it != this->settings.end(); it++)
-				std::cout << "  " << (*it).short_name << ", " << (*it).long_name
-						<< std::string(std::max(1, SEPARATING_NAMES_MANDATORY - (int)(*it).short_name.length() - (int)(*it).long_name.length() - (int)((std::string)", ").length()), ' ')
+				std::cout << "  -" << (*it).short_name << ", --" << (*it).long_name
+						<< std::string(std::max(1, SEPARATING_NAMES_MANDATORY - (int)(*it).short_name.length() - (int)(*it).long_name.length() - (int)((std::string)", ---").length()), ' ')
 						<< ((*it).is_mandatory
 								? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
 								: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
@@ -260,10 +262,10 @@ class ParametersParser {
 				// ---- Parsing non-positional arguments ----
 				else
 				{
-					size_t pos = find(argv, i, argc, (*it).short_name);
+					size_t pos = find(argv, i, argc, "-" + (*it).short_name);
 					if (pos>=argc)
 					{
-						pos = find(argv, i, argc, (*it).long_name);
+						pos = find(argv, i, argc, "--" + (*it).long_name);
 					}
 					// If found
 					if(pos<argc)
@@ -288,9 +290,35 @@ class ParametersParser {
 				}
 			}
 		}
+
+		/**
+		 * Similar as std getline, but allow to escape delimiter using '\'
+		 *
+		 * @param current_line_stream The stringstream from which to read
+		 * @param parsed Line into which the data will be parsed
+		 * @param delimiter The delimiter to split lines
+		 * @return False if current_line_stream was already at end of line
+		 * @bug If the last char is an escaped delimiter, it won't be properly
+		 * escaped. In that case you should add an extra delimiter at the end
+		 */
+		static bool getline_escape(std::stringstream &current_line_stream, std::string& parsed, char delimiter)
+		{
+			std::string temp_parsed;
+			if(!getline(current_line_stream,temp_parsed, delimiter))
+				return false;
+			else{
+				parsed = temp_parsed;
+				for(;!parsed.empty() && parsed.back() == '\\' && getline(current_line_stream,temp_parsed, delimiter);)
+				{
+					parsed.back() = delimiter;
+					parsed += temp_parsed;
+				}
+				return true;
+			}
+		}
 	public :
 		/**
-		 * ParameterParser constructor
+		 * ParametersParser constructor
 		 *
 		 * @param help_message The general message to display in help
 		 */
@@ -300,7 +328,62 @@ class ParametersParser {
 			are_parameters_parsed(false) {}
 
 		/**
-		 * ParameterParser destructor
+		 * Factory building a ParametersParser from a file
+		 *
+		 * The file should contain the help_message that can be multi-lines but
+		 * should not contain empty lines, then an empty line to separate it
+		 * from the rest, and then a csv-like list of line, each representing a
+		 * parameter with data of a same line separated by ';'. The data should
+		 * be - in that order - the return name, the "is_mandatory" boolean, the
+		 * "is_positional" boolean, the short name, the long name, the
+		 * the description, the default value and the "is_boolean" boolean. The
+		 * last two data can be omitted. The data may contain ';' char but it
+		 * should be escaped using '\'. If an escaped ';' is located at the end
+		 * of the line, an extra ';' should be added after it.
+		 *
+		 * @param file_name Path to the file to read
+		 * @return The ParametersParser containing the help_message and the
+		 *  parameters
+		 */
+		static ParametersParser from_file(std::string file_name)
+		{
+			std::fstream config_file(file_name);
+			std::string current_line;
+			std::string help_message;
+			if (config_file.is_open()) {
+				for(; std::getline(config_file, current_line) && current_line != "";)
+					help_message += current_line + "\n";
+				ParametersParser to_return(help_message);
+				std::string parsed;
+				for(; std::getline(config_file, current_line);)
+				{
+					std::stringstream current_line_stream(current_line);
+					getline_escape(current_line_stream,parsed, ';');
+					std::string return_name = parsed;
+					getline_escape(current_line_stream,parsed, ';');
+					bool is_mandatory = (parsed!="0" && parsed != "false" && parsed !="False" && parsed != "");
+					getline_escape(current_line_stream,parsed, ';');
+					bool is_positional = (parsed!="0" && parsed != "false" && parsed !="False" && parsed != "");
+					getline_escape(current_line_stream,parsed, ';');
+					std::string short_name = parsed;
+					getline_escape(current_line_stream,parsed, ';');
+					std::string long_name = parsed;
+					getline_escape(current_line_stream,parsed, ';');
+					std::string description = parsed;
+					std::string default_value = getline_escape(current_line_stream,parsed, ';') ? parsed : "";
+					bool is_boolean = getline_escape(current_line_stream,parsed, ';') ? (parsed!="0" && parsed != "false" && parsed !="False" && parsed != ""): false;
+					to_return.add_parameter(is_mandatory, is_positional,
+											return_name, short_name, long_name,
+											description, default_value, is_boolean);
+				}
+				return to_return;
+			}
+			else
+				throw std::runtime_error("Error when oppening the parameters config file");
+		}
+
+		/**
+		 * ParametersParser destructor
 		 *
 		 * Do nothing
 		 */
@@ -358,7 +441,7 @@ class ParametersParser {
 		/**
 		 * Return the value of the parameter
 		 *
-		 * ParameterParser::parse_param should have been called before
+		 * ParametersParser::parse_param should have been called before
 		 *
 		 * @param parameter_name Name of the parameter of which value is needed
 		 * @return The value of the parameter to use in the program
