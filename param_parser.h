@@ -1,6 +1,8 @@
 /**
  * @file param_parser.h
- *  Defines a class to handle command-line parameters
+ *  Defines a struct to handle command-line parameters
+ * @todo Convert to class, for not having to give settings as functions inputs
+ * 	and to better enforce arguments positionning
  */
 #ifndef PARAMPARSER_H_INCLUDED
 #define PARAMPARSER_H_INCLUDED
@@ -151,64 +153,56 @@ size_t find(char *argv[], size_t begin, size_t size, std::string searched_obj)
 	return size;
 }
 
-// Return true if param "--help" was given, and therefore program has to return
 /**
- * Function parsing the parameters and filling parsed_params with the values
+ * Display the help text
  *
- * @param help_message General help message that will be displayed if param
- *  '--help' is found
- * @param settings List of param_setting defining the expected parameters. The
- *  mandatory positional parameters should come first, then the non-mandatory
- *  positional parameters, and then the non-positional parameters.
- * @param argc Size of the argv list
- * @param argv List of arguments, splitted by words
- * @param parsed_params In/Out dict of which values corresponding to keys that
- *  are the return_name of the parameters will be set to the value of the
- *  related parameter
- * @return True if the '--help' argument is found, and hence the help is
- *  displayed, the parsed_param dict is not filled and the program should stop
- *  immediately after exiting the function.
+ * @param program_name Name and path to the program, for running instructions
+ * @param help_message General help message to display
+ * @param settings List of parameters that could be given as program inputs
  */
-bool parse_param(std::string help_message, std::vector<param_setting> settings, int argc, char *argv[], std::map<std::string, std::string> &parsed_params)
+void display_help(std::string program_name, std::string help_message, std::vector<param_setting> settings)
 {
-	size_t pos = find(argv, 0, argc, "--help");
-	// Help argument found
-	if(pos < argc)
-	{
-		// ----------- Display help -----------
-		// Only print help and quit, don't execute the program itself
-		// ---- Print usage ----
-		std::cout << "Usage: " << argv[0];
-		for(auto it = settings.begin(); it != settings.end() && (*it).is_positional; it++)
-			std::cout << " " << (*it).return_name;
-		std::cout << " " << "[OPTIONS]" << std::endl << std::endl;
+	// ---- Print usage ----
+	std::cout << "Usage: " << program_name;
+	for(auto it = settings.begin(); it != settings.end() && (*it).is_positional; it++)
+		std::cout << " " << (*it).return_name;
+	std::cout << " " << "[OPTIONS]" << std::endl << std::endl;
 
-		// ---- Print general help message ----
-		std::cout << help_message << std::endl << std::endl;
+	// ---- Print general help message ----
+	std::cout << help_message << std::endl << std::endl;
 
-		// ---- Print positional arguments ----
-		std::cout << "Positional arguments:" <<std::endl;
-		auto it = settings.begin();
-		for(; it != settings.end() && (*it).is_positional; it++)
-			std::cout << "  " << (*it).return_name
-					<< std::string(std::max(1, (int)(SEPARATING_NAMES_MANDATORY - (*it).return_name.length())), ' ')
-					<< ((*it).is_mandatory
-							? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
-							: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
-					<< (*it).description << ((*it).default_value != "" ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
-		// ---- Print non-positional arguments ----
-		std::cout<<std::endl << "Options:" <<std::endl;
-		for(; it != settings.end(); it++)
-			std::cout << "  " << (*it).short_name << ", " << (*it).long_name
-					<< std::string(std::max(1, SEPARATING_NAMES_MANDATORY - (int)(*it).short_name.length() - (int)(*it).long_name.length() - (int)((std::string)", ").length()), ' ')
-					<< ((*it).is_mandatory
-							? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
-							: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
-					<< (*it).description << ((*it).default_value != "" && !(*it).is_boolean ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
-		return true;
+	// ---- Print positional arguments ----
+	std::cout << "Positional arguments:" <<std::endl;
+	auto it = settings.begin();
+	for(; it != settings.end() && (*it).is_positional; it++)
+		std::cout << "  " << (*it).return_name
+				<< std::string(std::max(1, (int)(SEPARATING_NAMES_MANDATORY - (*it).return_name.length())), ' ')
+				<< ((*it).is_mandatory
+						? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
+						: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
+				<< (*it).description << ((*it).default_value != "" ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
+	// ---- Print non-positional arguments ----
+	std::cout<<std::endl << "Options:" <<std::endl;
+	for(; it != settings.end(); it++)
+		std::cout << "  " << (*it).short_name << ", " << (*it).long_name
+				<< std::string(std::max(1, SEPARATING_NAMES_MANDATORY - (int)(*it).short_name.length() - (int)(*it).long_name.length() - (int)((std::string)", ").length()), ' ')
+				<< ((*it).is_mandatory
+						? "mandatory" + std::string(std::max(1, SEPARATING_MANDATORY_DESC - (int)((std::string)"mandatory").length()), ' ')
+						: std::string(std::max(1, SEPARATING_MANDATORY_DESC), ' '))
+				<< (*it).description << ((*it).default_value != "" && !(*it).is_boolean ? " (Default: " + (*it).default_value + ")" : "") << std::endl;
+}
 
-	}
-	// ----------- Parse arguments -----------
+/**
+ * Parse the parameters given as input_iterator
+ *
+ * @param settings List of acceptable command-line parameters
+ * @param argc Number of provided command-line parameters (including name of the program)
+ * @param argv List of the parameters
+ * @return Map from parameters return_name to value to use (either the one provided or the default one)
+ */ 
+std::map<std::string, std::string> parse_command_line(std::vector<param_setting> settings, int argc, char *argv[])
+{
+	std::map<std::string, std::string> parsed_params; 
 	/// Set to false when the first non-positional argument has been studied
 	bool are_still_positional = true;
 	/**
@@ -253,7 +247,7 @@ bool parse_param(std::string help_message, std::vector<param_setting> settings, 
 		// ---- Parsing non-positional arguments ----
 		else
 		{
-			pos = find(argv, i, argc, (*it).short_name);
+			size_t pos = find(argv, i, argc, (*it).short_name);
 			if (pos>=argc)
 			{
 				pos = find(argv, i, argc, (*it).long_name);
@@ -282,6 +276,37 @@ bool parse_param(std::string help_message, std::vector<param_setting> settings, 
 			}
 		}
 	}
+	return parsed_params;
+}
+
+/**
+ * Function parsing the parameters or displaying help
+ *
+ * @param help_message General help message that will be displayed if param
+ *  '--help' is found
+ * @param settings List of param_setting defining the expected parameters. The
+ *  mandatory positional parameters should come first, then the non-mandatory
+ *  positional parameters, and then the non-positional parameters.
+ * @param argc Size of the argv list
+ * @param argv List of arguments, splitted by words
+ * @param parsed_params Out dict of which values corresponding to keys that
+ *  are the return_name of the parameters will be set to the value of the
+ *  related parameter. Don't need to be initialized.
+ * @return True if the '--help' argument is found, and hence the help is
+ *  displayed, the parsed_param dict is not filled and the program should stop
+ *  immediately after exiting the function.
+ */
+bool parse_param(std::string help_message, std::vector<param_setting> settings, int argc, char *argv[], std::map<std::string, std::string> &parsed_params)
+{
+	size_t pos = find(argv, 0, argc, "--help");
+	// Help argument found
+	if(pos < argc)
+	{
+		// Only print help and quit, don't execute the program itself
+		display_help(argv[0], help_message, settings);
+		return true;
+	}
+	parsed_params = parse_command_line(settings, argc, argv);
 	return false;
 }
 #endif // PARAMPARSER_H_INCLUDED
