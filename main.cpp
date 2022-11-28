@@ -556,144 +556,6 @@ Tree branched_from_file(std::string file_name,
 /// Main function, see help (run program with argument '--help')
 int main(int argc, char *argv[])
 {
-	/// @todo Move arguments to a a dedicated config file
-	std::vector<param_setting> settings {
-		param_setting(true,
-			true,
-			"file_name",
-			"",
-			"",
-			"Name of the file containing data",
-			""),
-		param_setting(false,
-			false,
-			"label_true_value",
-			"-v",
-			"--true_value",
-			"Value of the label that will be considered as true",
-			"1"),
-		param_setting(false,
-			false,
-			"delimiter",
-			"-d",
-			"--delimiter",
-			"Character that separate data in the file",
-			";"),
-		param_setting(false,
-			false,
-			"skip_first_line",
-			"-s",
-			"--skip",
-			"Indicates that file has a header line before the one describing fields types",
-			"",
-			true),
-		param_setting(false,
-			false,
-			"max_gain_error",
-			"-M",
-			"--beta",
-			"Max distance between the actual and the best split gain of the node if epsilon is calculated automatically",
-			"1"),
-		param_setting(false,
-			false,
-			"epsilon",
-			"-e",
-			"--epsilon",
-			"Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(max_gain_error/13, min_split_gini/6, 1/(min_split_points+2))",
-			"-1"),
-		param_setting(false,
-			false,
-			"dataset_size",
-			"-b",
-			"--dataset_size",
-			"Size of the window in SLIDING test or of the initial dataset in RANDOM mode",
-			"3000"),
-		param_setting(false,
-			false,
-			"eval_proba",
-			"-a",
-			"--proba",
-			"Probability of a point after the window to be evaluation point",
-			"0.01"),
-		param_setting(false,
-			false,
-			"seed",
-			"-r",
-			"--seed",
-			"Seed for choosing evaluation points (if -1 : random)",
-			"-1"),
-		param_setting(false,
-			false,
-			"max_height",
-			"-h",
-			"--max_height",
-			"Max number of vertices between root and leaf (included)",
-			"5"),
-		param_setting(false,
-			false,
-			"test_type",
-			"-t",
-			"--type",
-			"Type of test to make, between 'S' or 'SLIDING' for sliding window, and 'R' or 'RANDOM' for random unordered sampling",
-			"S"),
-		param_setting(false,
-			false,
-			"nb_updates",
-			"-u",
-			"--nb_updates",
-			"Number of updates (add and del) to include in RANDOM test",
-			"1000"),
-		param_setting(false,
-			false,
-			"insert_proba",
-			"-i",
-			"--insert_proba",
-			"Probability of each event in RANDOM test to be an insertion",
-			"0.5"),
-		param_setting(false,
-			false,
-			"is_output_csv",
-			"-c",
-			"--csv",
-			"Indicates that the ouput should be formatted as CSV",
-			"",
-			true),
-		param_setting(false,
-			false,
-			"min_split_points",
-			"-m",
-			"--min_split_points",
-			"Minimal number of points in a vertex to make it have children",
-			"0"),
-		param_setting(false,
-			false,
-			"min_split_gini",
-			"-g",
-			"--min_split_gini",
-			"Minimal gini value of the points set of a vertex to make it have children",
-			"0"),
-		param_setting(false,
-			false,
-			"epsilon_transmission",
-			"-w",
-			"--epsilon_transmission",
-			"Epsilon to apply when choosing which layer to recompute. If -1 : epsilon",
-			"1"),
-		param_setting(false,
-			false,
-			"epsilon_max",
-			"-f",
-			"--epsilon_max",
-			"For making several tests, set this to the max epsilon to test. If -1 : epsilon",
-			"-1"),
-		param_setting(false,
-			false,
-			"epsilon_step",
-			"-j",
-			"--epsilon_step",
-			"For making several tests, set this to the step between epsilons to test",
-			"0.1")
-	};
 	std::string help_message = std::string("This program runs the Dynamic Decision Tree algorithm (see [paper to be published]).\n")
 	+ std::string("The input file MUST be a csv featuring an header with as many columns as the rest of the file. Each column MUST contain a single character, 'l' if the column contains the decision label, 'n' if the column is numerical, 'b' if the column is binary and 'c' if it is categorial. The file MAY also feature a single line containing data irrelevant for the algorithm, in which case this line MUST be at the beginning of the file, before the header, and the '-s' argument MUST be provided.\n")
 	+ std::string("If the '-c' argument is provided, the output will be formatted as csv without header. If several runs are made using various values for epsilon, each run will correspond to a single output line. The csv columns will be \n")
@@ -709,35 +571,170 @@ int main(int argc, char *argv[])
 	+ std::string(" - The mean training error, evaluated along all iterations\n")
 	+ std::string("An header of the output csv could therefore be :\n")
 	+ std::string("seed;current_epsilon;true_positive;true_negative;false_positive;false_negative;init_time;iter_time;nb_build;mean_training_error");
-
-	std::map<std::string, std::string> parsed_params;
-	if(parse_param(help_message, settings, argc, argv, parsed_params))
+	ParametersParser parameters_parser(help_message);
+	/// @todo Move arguments to a a dedicated config file
+	parameters_parser.add_parameter(true,
+		true,
+		"file_name",
+		"",
+		"",
+		"Name of the file containing data",
+		"");
+	parameters_parser.add_parameter(false,
+		false,
+		"label_true_value",
+		"-v",
+		"--true_value",
+		"Value of the label that will be considered as true",
+		"1");
+	parameters_parser.add_parameter(false,
+		false,
+		"delimiter",
+		"-d",
+		"--delimiter",
+		"Character that separate data in the file",
+		";");
+	parameters_parser.add_parameter(false,
+		false,
+		"skip_first_line",
+		"-s",
+		"--skip",
+		"Indicates that file has a header line before the one describing fields types",
+		"",
+		true);
+	parameters_parser.add_parameter(false,
+		false,
+		"max_gain_error",
+		"-M",
+		"--beta",
+		"Max distance between the actual and the best split gain of the node if epsilon is calculated automatically",
+		"1");
+	parameters_parser.add_parameter(false,
+		false,
+		"epsilon",
+		"-e",
+		"--epsilon",
+		"Epsilon of algorithm, determining when to rebuild node. If -1, will be calculated as min(max_gain_error/13, min_split_gini/6, 1/(min_split_points+2))",
+		"-1");
+	parameters_parser.add_parameter(false,
+		false,
+		"dataset_size",
+		"-b",
+		"--dataset_size",
+		"Size of the window in SLIDING test or of the initial dataset in RANDOM mode",
+		"3000");
+	parameters_parser.add_parameter(false,
+		false,
+		"eval_proba",
+		"-a",
+		"--proba",
+		"Probability of a point after the window to be evaluation point",
+		"0.01");
+	parameters_parser.add_parameter(false,
+		false,
+		"seed",
+		"-r",
+		"--seed",
+		"Seed for choosing evaluation points (if -1 : random)",
+		"-1");
+	parameters_parser.add_parameter(false,
+		false,
+		"max_height",
+		"-h",
+		"--max_height",
+		"Max number of vertices between root and leaf (included)",
+		"5");
+	parameters_parser.add_parameter(false,
+		false,
+		"test_type",
+		"-t",
+		"--type",
+		"Type of test to make, between 'S' or 'SLIDING' for sliding window, and 'R' or 'RANDOM' for random unordered sampling",
+		"S");
+	parameters_parser.add_parameter(false,
+		false,
+		"nb_updates",
+		"-u",
+		"--nb_updates",
+		"Number of updates (add and del) to include in RANDOM test",
+		"1000");
+	parameters_parser.add_parameter(false,
+		false,
+		"insert_proba",
+		"-i",
+		"--insert_proba",
+		"Probability of each event in RANDOM test to be an insertion",
+		"0.5");
+	parameters_parser.add_parameter(false,
+		false,
+		"is_output_csv",
+		"-c",
+		"--csv",
+		"Indicates that the ouput should be formatted as CSV",
+		"",
+		true);
+	parameters_parser.add_parameter(false,
+		false,
+		"min_split_points",
+		"-m",
+		"--min_split_points",
+		"Minimal number of points in a vertex to make it have children",
+		"0");
+	parameters_parser.add_parameter(false,
+		false,
+		"min_split_gini",
+		"-g",
+		"--min_split_gini",
+		"Minimal gini value of the points set of a vertex to make it have children",
+		"0");
+	parameters_parser.add_parameter(false,
+		false,
+		"epsilon_transmission",
+		"-w",
+		"--epsilon_transmission",
+		"Epsilon to apply when choosing which layer to recompute. If -1 : epsilon",
+		"1");
+	parameters_parser.add_parameter(false,
+		false,
+		"epsilon_max",
+		"-f",
+		"--epsilon_max",
+		"For making several tests, set this to the max epsilon to test. If -1 : epsilon",
+		"-1");
+	parameters_parser.add_parameter(false,
+		false,
+		"epsilon_step",
+		"-j",
+		"--epsilon_step",
+		"For making several tests, set this to the step between epsilons to test",
+		"0.1");
+	if(parameters_parser.parse_param(argc, argv))
 		return 0;
-	std::string file_name = parsed_params["file_name"];
-	std::string label_true_value = parsed_params["label_true_value"];
-	char delimiter = parsed_params["delimiter"][0];
-	bool skip_first_line = parsed_params["skip_first_line"] == BOOLEAN_TRUE_VALUE;
-	unsigned int dataset_size = (unsigned int)std::stoul(parsed_params["dataset_size"]);
-	float eval_proba = std::stof(parsed_params["eval_proba"]);
-	unsigned int seed = parsed_params["seed"] == "-1" ? time(0) : (unsigned int)std::stoul(parsed_params["seed"]);
-	unsigned int max_height = (unsigned int)std::stoul(parsed_params["max_height"]);
+	std::string file_name = parameters_parser.get_value("file_name");
+	std::string label_true_value = parameters_parser.get_value("label_true_value");
+	char delimiter = parameters_parser.get_value("delimiter")[0];
+	bool skip_first_line = parameters_parser.get_value("skip_first_line") == BOOLEAN_TRUE_VALUE;
+	unsigned int dataset_size = (unsigned int)std::stoul(parameters_parser.get_value("dataset_size"));
+	float eval_proba = std::stof(parameters_parser.get_value("eval_proba"));
+	unsigned int seed = parameters_parser.get_value("seed") == "-1" ? time(0) : (unsigned int)std::stoul(parameters_parser.get_value("seed"));
+	unsigned int max_height = (unsigned int)std::stoul(parameters_parser.get_value("max_height"));
 	algo_type current_algo_type;
-	if(parsed_params["test_type"] == "S" || parsed_params["test_type"] == "SLIDING")
+	if(parameters_parser.get_value("test_type") == "S" || parameters_parser.get_value("test_type") == "SLIDING")
 			current_algo_type = algo_type::SLIDING;
-	else if(parsed_params["test_type"] == "R" || parsed_params["test_type"] == "RANDOM")
+	else if(parameters_parser.get_value("test_type") == "R" || parameters_parser.get_value("test_type") == "RANDOM")
 			current_algo_type = algo_type::RANDOM;
 	else
-			throw std::runtime_error("Unknown algo type : " + parsed_params["test_type"]);
-	unsigned int nb_updates = (unsigned int)std::stoul(parsed_params["nb_updates"]);
-	float insert_proba = std::stof(parsed_params["insert_proba"]);
-	bool is_output_csv = parsed_params["is_output_csv"] == BOOLEAN_TRUE_VALUE;
-	unsigned int min_split_points = (unsigned int)std::stoul(parsed_params["min_split_points"]);
-	float min_split_gini = std::stof(parsed_params["min_split_gini"]);
-	float max_gain_error = std::stof(parsed_params["max_gain_error"]);
-	float epsilon_step = std::stof(parsed_params["epsilon_step"]);
-	float epsilon = parsed_params["epsilon"] == "-1" ? std::min(std::min(max_gain_error/13, min_split_gini/6),  float(1)/(min_split_points + 2)) : std::stof(parsed_params["epsilon"]);
-	float epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_transmission"]);
-	float epsilon_max = parsed_params["epsilon_max"] == "-1" ? epsilon : std::stof(parsed_params["epsilon_max"]);
+			throw std::runtime_error("Unknown algo type : " + parameters_parser.get_value("test_type"));
+	unsigned int nb_updates = (unsigned int)std::stoul(parameters_parser.get_value("nb_updates"));
+	float insert_proba = std::stof(parameters_parser.get_value("insert_proba"));
+	bool is_output_csv = parameters_parser.get_value("is_output_csv") == BOOLEAN_TRUE_VALUE;
+	unsigned int min_split_points = (unsigned int)std::stoul(parameters_parser.get_value("min_split_points"));
+	float min_split_gini = std::stof(parameters_parser.get_value("min_split_gini"));
+	float max_gain_error = std::stof(parameters_parser.get_value("max_gain_error"));
+	float epsilon_step = std::stof(parameters_parser.get_value("epsilon_step"));
+	float epsilon = parameters_parser.get_value("epsilon") == "-1" ? std::min(std::min(max_gain_error/13, min_split_gini/6),  float(1)/(min_split_points + 2)) : std::stof(parameters_parser.get_value("epsilon"));
+	float epsilon_transmission = parameters_parser.get_value("epsilon_transmission") == "-1" ? epsilon : std::stof(parameters_parser.get_value("epsilon_transmission"));
+	float epsilon_max = parameters_parser.get_value("epsilon_max") == "-1" ? epsilon : std::stof(parameters_parser.get_value("epsilon_max"));
     std::vector<tree_event> event_vector;
 
     const auto t1 = std::chrono::high_resolution_clock::now();
@@ -766,7 +763,7 @@ int main(int argc, char *argv[])
 
 	for(float current_epsilon = epsilon; current_epsilon <= epsilon_max; current_epsilon += epsilon_step)
 	{
-		epsilon_transmission = parsed_params["epsilon_transmission"] == "-1" ? current_epsilon : epsilon_transmission;
+		epsilon_transmission = parameters_parser.get_value("epsilon_transmission") == "-1" ? current_epsilon : epsilon_transmission;
 		Tree current_tree(reference_tree, current_epsilon, epsilon_transmission);
 		Vertex::reset_nb_build();
 		const auto t3 = std::chrono::high_resolution_clock::now();
