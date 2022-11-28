@@ -14,7 +14,7 @@ If the '-c' argument is provided, the output will be formatted as csv without he
 An header of the output csv could therefore be :
 seed;current_epsilon;true_positive;true_negative;false_positive;false_negative;init_time;iter_time;nb_build;mean_training_error
 
-file_name;true;true;;;Name of the file containing data;
+file_name;true;true;;file_name;Name of the file containing data;
 label_true_value;false;false;v;true_value;Value of the label that will be considered as true;1
 delimiter;false;false;d;delimiter;Character that separate data in the file;\;;
 skip_first_line;false;false;s;skip;Indicates that file has a header line before the one describing fields types;;true

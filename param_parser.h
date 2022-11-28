@@ -150,6 +150,8 @@ class ParametersParser {
 		std::string help_message;
 
 		/// List of settings of the program 
+		/// @todo Study to which extense it would be more efficient to have maps
+		/// of the various identifiers to those elements for fetching them
 		std::vector<param_setting> settings;
 
 		/// True after call to the function parse_param (values can be read)
@@ -178,6 +180,7 @@ class ParametersParser {
 		 * Display the help text
 		 *
 		 * @param program_name Name and path to the program, for running instructions
+		 * @todo Add help for '--help' and '--param_file' parameters
 		 */
 		void display_help(std::string program_name)
 		{
@@ -212,6 +215,42 @@ class ParametersParser {
 		}
 
 		/**
+		 * Fill parameters value with data in file
+		 *
+		 * Data should be in the csv format : each line should contain the
+		 * long_name of a parameter, then a ';' and then the value. If the value
+		 * contains ';', they should be escaped with char '\'. If an escaped ';'
+		 * is at the end of the file, it should be followed by an extra ';'
+		 *
+		 * @param file_name The name of the file containing the parameters
+		 */
+		void parse_from_file(std::string file_name)
+		{
+			std::fstream params_file(file_name);
+			std::string current_line;
+			if(params_file.is_open())
+			{
+				for(;getline(params_file, current_line);)
+				{
+					std::stringstream current_line_stream(current_line);
+					std::string current_parameter;
+					getline(current_line_stream, current_parameter, ';');
+					std::string current_value;
+					getline_escape(current_line_stream, current_value, ';');
+					for(auto it = this->settings.begin(); it != this->settings.end(); it++)
+						if(it->long_name == current_parameter)
+						{
+							it->value = current_value;
+							it->is_value_default = false;
+							break;
+						}
+				}
+			}
+			else
+				throw std::runtime_error("Error when oppening the parameters config file");
+		}
+
+		/**
 		 * Fill the parameters with values given as command line parameters
 		 *
 		 * @param argc Number of provided command-line parameters (including name of the program)
@@ -242,6 +281,9 @@ class ParametersParser {
 				are_still_positional = (*it).is_positional;
 				if(are_still_positional)
 				{
+					// The value is no more default, it has been set by file
+					if(!it->is_value_default)
+						continue;
 					// There are still arguments and the flag for arguments identifier
 					// is not found (therefore it is supposed to be a positional
 					// argument
@@ -282,7 +324,7 @@ class ParametersParser {
 							(*it).is_value_default = false;
 						}
 					}
-					else if(!(*it).is_boolean && (*it).is_mandatory)
+					else if(!(*it).is_boolean && (*it).is_mandatory && it->is_value_default)
 					{
 						std::cerr << "Error: Missing required non-positional parameter" << std::endl;
 						throw std::runtime_error("Error: Missing required non-positional parameter");
@@ -417,7 +459,6 @@ class ParametersParser {
 		 *  argument, only the identifier (with dashes) needs to be given. If the
 		 *  identifier is found, the parameter will be "1", else it will be "0".
 		 * @todo Add the parameter at the right place in the vector
-		 * @todo Remove necessity to manually put dashes in parameters names
 		 */
 		void add_parameter(bool is_mandatory,
 							bool is_positional,
@@ -475,6 +516,11 @@ class ParametersParser {
 				// Only print help and quit, don't execute the program itself
 				display_help(argv[0]);
 				return true;
+			}
+			pos = find(argv, 0, argc, "--param_file");
+			if(pos+1 < argc)
+			{
+				parse_from_file(argv[pos+1]);
 			}
 			parse_command_line(argc, argv);
 			return false;
